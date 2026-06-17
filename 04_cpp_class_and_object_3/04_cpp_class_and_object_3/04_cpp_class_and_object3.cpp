@@ -194,7 +194,10 @@ public:
 		:_a(a)
 	{ }
 
-	
+	void print() const
+	{
+		cout << _a << _sta << endl;
+	}
 	static int Get()
 	{
 		//静态成员函数不能访问非静态成员变量
