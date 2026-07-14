@@ -147,11 +147,67 @@ void Test02()
 	s1 += 'y';
 	cout << s1 << endl;
 
-	s2.insert(0, "kakbl");
+	s2.insert(5, "$$");
 	cout << s2 << endl;
+
+	s2.insert(4, "***");
+
+	s2.insert(0, "$$$");
+	cout << s2 << endl;
+
 
 }
 
+void Test03()
+{
+	string s1("hello world!");
+	cout << s1 << endl;
+
+	s1.erase(5, 1);
+	cout << s1 << endl;
+
+	s1.erase(0);
+	cout << s1 << endl;
+
+}
+
+void Test04()
+{
+	string s = "string.cpp.zip";
+	size_t pos = s.find('.');
+	//s -> .cpp.zip 
+
+	//浅拷贝，而sub出函数之后直接销毁，对应指向_str也被释放掉
+	//因此tmp中的_str指向无效字符
+	string tmp = s.substr(pos);
+	cout << tmp << endl;
+
+}
+
+void Test05()
+{
+	string s1("hello world");
+	string s2("hello world");
+
+	cout << (s1 < s2) << endl;
+	cout << (s1 == s2) << endl;
+
+	cout << (s1 < "hello world") << endl;
+	cout << ("hello world" == s2) << endl;
+
+	cout << s1 << s2 << endl;
+}
+
+void Test06()
+{
+	string s1("hello world!\n");
+	string s2("hello world!\n");
+
+	cin >> s1;
+	cout << s1 << endl;
+
+
+}
 
 
 int main()
@@ -164,7 +220,15 @@ int main()
 	//test_string6();
 
 	//Test01();
-	Test02();
+	//Test02();
+	//Test03();
+	//Test04();
+	//Test05();
+	Test06();
+
+
+
+
 
 	return 0;
 }

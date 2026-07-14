@@ -2,8 +2,8 @@
 
 #pragma once
 #include <iostream>
-#include <string>
 #include <assert.h>
+#include <cstring>
 
 using namespace std;
 
@@ -50,6 +50,32 @@ namespace stn
 
 			//strcpy会将\0一并拷贝
 			strcpy(_str, str);
+		}
+
+		//s2(s1)
+		string(const string& s)
+		{
+			_str = new char[s._capacity + 1];
+			strcpy(_str, s._str);
+			_size = s._size;
+			_capacity = s._capacity;
+		}
+
+		//s2 = s1
+		string& operator=(const string& s)
+		{
+			//防止自己直接释放自己
+			if (this != &s)
+			{
+				delete[] _str;
+				_str = new char[s._capacity + 1];
+				strcpy(_str, s._str);
+
+				_size = s._size;
+				_capacity = s._capacity;
+			}
+
+			return *this;
 		}
 
 		~string()
@@ -103,6 +129,10 @@ namespace stn
 		void insert(size_t pos, const char* str);
 		void erase(size_t pos, size_t len = npos);
 
+		size_t find(char ch, size_t pos = 0);
+		size_t find(const char* str, size_t pos = 0);
+		string substr(size_t pos = 0, size_t len = npos);
+
 	private:
 		char* _str = nullptr;
 		size_t _size = 0;
@@ -111,4 +141,17 @@ namespace stn
 
 		static const size_t npos;
 	};
+
+	bool operator<(const string& s1, const string& s2);
+	bool operator<=(const string& s1, const string& s2);
+	bool operator>(const string& s1, const string& s2);
+	bool operator>=(const string& s1, const string& s2);
+	bool operator==(const string& s1, const string& s2);
+	bool operator!=(const string& s1, const string& s2);
+
+	ostream& operator<<(ostream& out, const string& s);
+	istream& operator>>(istream& in , string& s);
+
+
 }
+
