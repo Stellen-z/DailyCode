@@ -53,30 +53,68 @@ namespace stn
 		}
 
 		//s2(s1)
+		//string(const string& s)
+		//{
+		//	_str = new char[s._capacity + 1];
+		//	strcpy(_str, s._str);
+		//	_size = s._size;
+		//	_capacity = s._capacity;
+		//}
+
+		//现代写法
+		void swap(string& s)
+		{
+			std::swap(_str, s._str);
+			std::swap(_size, s._size);
+			std::swap(_capacity, s._capacity);
+		}
+		//s1(s2)
 		string(const string& s)
 		{
-			_str = new char[s._capacity + 1];
-			strcpy(_str, s._str);
-			_size = s._size;
-			_capacity = s._capacity;
+			string tmp(s);
+
+			swap(tmp);
 		}
 
 		//s2 = s1
-		string& operator=(const string& s)
-		{
-			//防止自己直接释放自己
-			if (this != &s)
-			{
-				delete[] _str;
-				_str = new char[s._capacity + 1];
-				strcpy(_str, s._str);
+		//string& operator=(const string& s)
+		//{
+		//	//防止自己直接释放自己
+		//	if (this != &s)
+		//	{
+		//		delete[] _str;
+		//		_str = new char[s._capacity + 1];
+		//		strcpy(_str, s._str);
 
-				_size = s._size;
-				_capacity = s._capacity;
-			}
+		//		_size = s._size;
+		//		_capacity = s._capacity;
+		//	}
+
+		//	return *this;
+		//}
+		
+		//s2 = s1
+		//string& operator=(const string& s)
+		//{
+		//	if (this != &s)
+		//	{
+		//		string tmp(s);
+		//		string tmp(s._str);
+
+		//		swap(tmp);
+
+		//		return *this;
+		//	}
+		//}
+
+		//s2 = s1
+		string& operator=(string tmp)
+		{
+			swap(tmp);
 
 			return *this;
 		}
+
 
 		~string()
 		{

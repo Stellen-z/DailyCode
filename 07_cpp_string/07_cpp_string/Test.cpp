@@ -205,9 +205,10 @@ void Test06()
 
 	cin >> s1;
 	cout << s1 << endl;
-
-
+		
 }
+
+
 
 
 int main()
