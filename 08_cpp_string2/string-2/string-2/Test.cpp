@@ -309,6 +309,12 @@ void Test02()
 			_str = new char[len + 1];
 			strcpy(_str, str);
 		}
+		//拷贝构造
+		String(const String& s)
+			:_str(new char[strlen(s._str) + 1])
+		{
+			strcpy(_str, s._str);
+		}
 
 		~String()
 		{
@@ -323,12 +329,89 @@ void Test02()
 	String s2(s1);
 }
 
+//*******************************************************
+#include "string.h"
+
+namespace stl
+{
+	void test_memeberfunc()
+	{
+		string s("hello world");
+		string s1("xxx");
+		string s2("***");
+
+		string ss(s);//hello world
+
+		s1 = s2;//s1 = s2 = "***"
+	}
+
+	void test_capacity()
+	{
+		string s("hello world");
+
+		std::cout << "size = " << s.size() << std::endl;
+		std::cout << "length = " << s.length() << std::endl;
+		std::cout << "capacity = " << s.capacity() << std::endl;
+
+		std::cout << std::endl;
+
+		std::cout << s.empty() << std::endl;
+		s.claer();
+		std::cout << s.empty() << std::endl;
+
+		std::cout << std::endl;
+
+		string ss("hello cpp");
+
+		std::cout << "扩容前容量大小: " << ss.capacity() << std::endl;
+		ss.reserve(10);
+		std::cout << "扩容后容量大小: " << ss.capacity() << std::endl;
+			
+		std::cout << "填充字符前size大小: " << ss.size() << std::endl;
+		ss.resize(15, '#');
+		std::cout << "填充字符后size大小: " << ss.size() << std::endl;
+
+	}
+
+	void test_iterate()
+	{
+		string s("hello world");
+
+		//1.下标遍历
+		for (int i = 0; i < s.size(); i++)
+		{
+			std::cout << s[i] << " ";
+		}
+		std::cout << std::endl;
+
+		//2.迭代器
+		for (auto it = s.begin(); it != s.end(); it++)
+		{
+			std::cout << *it << " ";
+		}
+		std::cout << std::endl;
+
+		//3.范围for
+		for (auto ch : s)
+		{
+			std::cout << ch << " ";
+		}
+		std::cout << std::endl;
+	}
+
+}
+
+
+
 
 int main()
 {
 	//Test01();
-	Test02();
+	//Test02();
 
+	//stl::test_memeberfunc();
+	//stl::test_capacity();
+	stl::test_iterate();
 
 	return 0;
 }
