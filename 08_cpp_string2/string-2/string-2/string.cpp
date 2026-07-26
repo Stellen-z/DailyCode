@@ -35,6 +35,7 @@ namespace stl
 
 			//更新_size
 			_size = n;
+			_str[_size] = '\0';
 		}
 	}
 
@@ -64,19 +65,102 @@ namespace stl
 
 		//更新_size
 		_size += len;
+
+		return *this;
 	}
+
+	void string::insert(size_t pos, char ch)
+	{
+		assert(pos >= 0);
+		assert(pos <= _size);
+		
+		//扩容
+		if (_size + 1 + 1 >= _capacity)
+		{
+			reserve(_size + 2 >= 2 * _capacity ? _size + 2 : 2 * _capacity);
+		}
+
+		//size_t end = _size;
+		//while (end >= pos)
+		//{
+		//	_str[end + 1] = _str[end];
+		//	--end;
+		//}
+
+		size_t end = _size + 1;
+		while (end >= pos + 1)
+		{
+			_str[end] = _str[end - 1];
+			--end;
+		}
+
+		_str[pos] = ch;
+		_size++;
+
+	}
+
+
+
+
+
+
+
+
+	void string::insert(size_t pos, const char* str)
+	{
+		assert(pos >= 0);
+		assert(pos <= _size);
+
+		size_t len = strlen(str);
+		if (_size + 1 + len >= _capacity)
+		{
+			reserve(_size + 1 + len >= 2 * _capacity ? _size + 1 : 2 * _capacity);
+		}
+
+		//挪动数据
+		//size_t end = _size + len + 1;
+		//while (end >= pos + len + 1)
+		//{
+		//	_str[end] = _str[end - len];
+		//	--end;
+		//}
+		
+		size_t end = _size + len;
+		while (end >= pos + len)
+		{
+			_str[end] = _str[end - len];
+			--end;
+		}
+
+		//填充数据
+		for (size_t i = 0; i < len; i++)
+		{
+			_str[i + pos] = str[i];
+		}
+		
+		_size += len;
+
+	}
+	//void string::erase(size_t pos, size_t len)
+	//{
+
+	//}
+
 
 	string& string::operator+=(const char* s)
 	{
 		//复用append
 		append(s);
-	}
 
+		return *this;
+	}
 
 	string& string::operator+=(char c)
 	{
 		//复用push_back
 		push_back(c);
+
+		return *this;
 	}
 
 	const char* string::c_str() const
@@ -102,10 +186,13 @@ namespace stl
 		assert(pos < _size);
 
 		//strstr()返回第一次出现位置的地址，减去起始地址即为下标
-		return strstr(_str + pos, s) - _str;
+		char* ret = strstr(_str + pos, s);
+		if (ret == nullptr) return npos;
+
+		return ret - _str;
 	}
 
-	string string::substr(size_t pos = 0, size_t len = npos) const
+	string string::substr(size_t pos, size_t len) const
 	{
 		assert(pos < _size);
 

@@ -399,7 +399,49 @@ namespace stl
 		std::cout << std::endl;
 	}
 
+	void test_insert()
+	{
+		string s("hello world");
+
+		std::cout << s.c_str() << std::endl;
+		s.insert(0, 'x');
+		std::cout << s.c_str() << std::endl;
+		s.insert(5, 'x');
+		std::cout << s.c_str() << std::endl;
+		s.insert(11, 'x');
+		std::cout << s.c_str() << std::endl;
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//std::cout << s.c_str() << std::endl;
+//s.insert(11,"xxx");
+//std::cout << s.c_str() << std::endl;
+
 }
+
+
 
 
 
@@ -411,7 +453,8 @@ int main()
 
 	//stl::test_memeberfunc();
 	//stl::test_capacity();
-	stl::test_iterate();
+	//stl::test_iterate();
+	stl::test_insert();
 
 	return 0;
 }

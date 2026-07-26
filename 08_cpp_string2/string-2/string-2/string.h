@@ -166,6 +166,11 @@ namespace stl
 		//修改操作
 		void push_back(char c);
 		string& append(const char* s);
+
+		void insert(size_t pos, char ch);
+		void insert(size_t pos, const char* str);
+		void erase(size_t pos, size_t len = npos);
+
 		string& operator+=(const char* s);
 		string& operator+=(char c);
 		const char* c_str() const;
