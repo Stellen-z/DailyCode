@@ -356,7 +356,7 @@ namespace stl
 		std::cout << std::endl;
 
 		std::cout << s.empty() << std::endl;
-		s.claer();
+		s.clear();
 		std::cout << s.empty() << std::endl;
 
 		std::cout << std::endl;
@@ -401,49 +401,92 @@ namespace stl
 
 	void test_insert()
 	{
-		string s("hello world");
+		//string s("hello world");
+		//std::cout << s.c_str() << std::endl;
 
+		//s.insert(0, 'x');
+		//std::cout << s.c_str() << std::endl;
+		//s.insert(5, 'x');
+		//std::cout << s.c_str() << std::endl;
+		//s.insert(11, 'x');
+		//std::cout << s.c_str() << std::endl;
+
+
+		//s.insert(0,"xxx");
+		//std::cout << s.c_str() << std::endl;
+		//s.insert(5, "yyy");
+		//std::cout << s.c_str() << std::endl;
+		//s.insert(11, "zzz");
+		//std::cout << s.c_str() << std::endl;
+		
+
+		string ss("xxxxyyyyzzzz");
+		std::cout << ss.c_str() << std::endl;
+
+		ss.erase(0, 2);
+		std::cout << ss.c_str() << std::endl;
+
+		ss.erase(4, 2);
+		std::cout << ss.c_str() << std::endl;
+
+		ss.erase(6, 2);
+		std::cout << ss.c_str() << std::endl;
+	}
+
+	void test_modify()
+	{
+		string s("hello world");
 		std::cout << s.c_str() << std::endl;
-		s.insert(0, 'x');
+
+		s.push_back('$');
 		std::cout << s.c_str() << std::endl;
-		s.insert(5, 'x');
+
+		s.append("xxx");
 		std::cout << s.c_str() << std::endl;
-		s.insert(11, 'x');
+		
+		s += '#';
 		std::cout << s.c_str() << std::endl;
+
+		s += "&&&";
+		std::cout << s.c_str() << std::endl;
+
+		size_t pos = s.find('$');
+		s.insert(pos, "111");
+		std::cout << s.c_str() << std::endl;
+
+		size_t find = s.find("&&&",3);
+		string tmp = s.substr(pos, 3);
+		std::cout << tmp.c_str() << std::endl;
+
+	}
+	void test_iostream()
+	{
+		string s("hello world");
+		std::cout << s << std::endl;
+
+		string s1("hello world");
+		string s2("hello world");
+
+		std::cin >> s1 >> s2;
+		std::cout << s1 << " " << s2 << std::endl;
+	
+	}
+	void test_cmp()
+	{
+		string s1("hello");
+		string s2("hexxx");
+
+		std::cout << (s1 < s2) << std::endl;
+		std::cout << (s1 <= s2) << std::endl;
+		std::cout << (s1 > s2) << std::endl;
+		std::cout << (s1 >= s2) << std::endl;
+		std::cout << (s1 == s2) << std::endl;
+		std::cout << (s1 != s2) << std::endl;
 
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//std::cout << s.c_str() << std::endl;
-//s.insert(11,"xxx");
-//std::cout << s.c_str() << std::endl;
-
 }
-
-
-
-
 
 
 int main()
@@ -454,7 +497,9 @@ int main()
 	//stl::test_memeberfunc();
 	//stl::test_capacity();
 	//stl::test_iterate();
-	stl::test_insert();
-
+	//stl::test_insert();
+	//stl::test_modify();
+	//stl::test_iostream();
+	stl::test_cmp();
 	return 0;
 }

@@ -32,11 +32,10 @@ namespace stl
 			{
 				_str[i] = c;
 			}
-
-			//更新_size
-			_size = n;
-			_str[_size] = '\0';
 		}
+		//更新_size
+		_size = n;
+		_str[_size] = '\0';
 	}
 
 	void string::push_back(char c)
@@ -75,9 +74,9 @@ namespace stl
 		assert(pos <= _size);
 		
 		//扩容
-		if (_size + 1 + 1 >= _capacity)
+		if (_size + 1 >= _capacity)
 		{
-			reserve(_size + 2 >= 2 * _capacity ? _size + 2 : 2 * _capacity);
+			reserve(_size + 1 >= 2 * _capacity ? _size + 1 : 2 * _capacity);
 		}
 
 		//size_t end = _size;
@@ -100,12 +99,6 @@ namespace stl
 	}
 
 
-
-
-
-
-
-
 	void string::insert(size_t pos, const char* str)
 	{
 		assert(pos >= 0);
@@ -114,17 +107,9 @@ namespace stl
 		size_t len = strlen(str);
 		if (_size + 1 + len >= _capacity)
 		{
-			reserve(_size + 1 + len >= 2 * _capacity ? _size + 1 : 2 * _capacity);
+			reserve(_size + 1 + len >= 2 * _capacity ? _size + 1 + len: 2 * _capacity);
 		}
 
-		//挪动数据
-		//size_t end = _size + len + 1;
-		//while (end >= pos + len + 1)
-		//{
-		//	_str[end] = _str[end - len];
-		//	--end;
-		//}
-		
 		size_t end = _size + len;
 		while (end >= pos + len)
 		{
@@ -141,10 +126,29 @@ namespace stl
 		_size += len;
 
 	}
-	//void string::erase(size_t pos, size_t len)
-	//{
 
-	//}
+	void string::erase(size_t pos, size_t len)
+	{
+		assert(pos >= 0);
+		assert(pos < _size);
+
+		if (len >= _size - pos)
+		{
+			_size = pos;
+			_str[pos] = '\0';
+		}
+		else
+		{
+			size_t begin = pos + len;
+			while (begin <= _size)
+			{
+				_str[begin - len] = _str[begin];
+				++begin;
+			}
+
+			_size -= len;
+		}
+	}
 
 
 	string& string::operator+=(const char* s)
@@ -211,6 +215,79 @@ namespace stl
 		}
 
 		return tmp;
+	}
+
+	std::ostream& operator<<(std::ostream& out, const string& s)
+	{
+		for (auto ch : s)
+		{
+			out << ch;
+		}
+
+		return out;
+	}
+	std::istream& operator>>(std::istream& in, string& s)
+	{
+		s.clear();
+
+		const int N = 128;
+		char buff[N];
+		int index = 0;
+
+		char ch;
+		//in >> ch;
+		//使用get函数
+		ch = in.get();
+		
+		while (ch != ' ' && ch != '\n')
+		{
+			buff[index++] = ch;
+
+			//还有一个位置
+			if (index == N - 1)
+			{
+				buff[index] = '\0';
+				s += buff;
+
+				index = 0;
+			}
+
+			//in >> ch;
+			ch = in.get();
+		}
+		
+		if (index > 0)
+		{
+			buff[index] = '\0';
+			s += buff;
+		}
+
+		return in;
+	}
+
+	bool operator<(const string& s1, const string& s2)
+	{
+		return strcmp(s1.c_str(), s2.c_str()) < 0;
+	}
+	bool operator<=(const string& s1, const string& s2)
+	{
+		return s1 < s2 || s1 == s2;
+	}
+	bool operator>(const string& s1, const string& s2)
+	{
+		return !(s1 <= s2);
+	}
+	bool operator>=(const string& s1, const string& s2)
+	{
+		return !(s1 < s2);
+	}
+	bool operator==(const string& s1, const string& s2)
+	{
+		return strcmp(s1.c_str(), s2.c_str()) == 0;
+	}
+	bool operator!=(const string& s1, const string& s2)
+	{
+		return !(s1 == s2);
 	}
 
 }

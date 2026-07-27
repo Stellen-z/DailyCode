@@ -3,6 +3,7 @@
 #pragma once
 #include <iostream>
 #include <assert.h>
+#include <cstring>
 
 namespace stl
 {
@@ -116,7 +117,7 @@ namespace stl
 			return _size == 0;
 		}
 
-		void claer()
+		void clear()
 		{
 			_size = 0;
 			_str[_size] = '\0';
@@ -187,5 +188,15 @@ namespace stl
 
 		static const size_t npos;
 	};
+
+	std::ostream& operator<<(std::ostream& out, const string& s);
+	std::istream& operator>>(std::istream& in, string& s);
+
+	bool operator<(const string& s1, const string& s2);
+	bool operator<=(const string& s1, const string& s2);
+	bool operator>(const string& s1, const string& s2);
+	bool operator>=(const string& s1, const string& s2);
+	bool operator==(const string& s1, const string& s2);
+	bool operator!=(const string& s1, const string& s2);
 
 }
