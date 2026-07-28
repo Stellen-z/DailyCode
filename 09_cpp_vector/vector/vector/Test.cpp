@@ -3,6 +3,8 @@
 
 using namespace std;
 
+#include "vector.h"
+
 void test_vector1()
 {
 	vector<int> v1;
@@ -163,17 +165,26 @@ void test_vector6()
 
 }
 
+void Test01()
+{
+	test_vector1();
+	test_vector2();
+	test_vector3();
+	test_vector4();
+	test_vector5();
+	test_vector6();
+}
 
 int main()
 {
-	//test_vector1();
-	//test_vector2();
-	//test_vector3();
-	//test_vector4();
-	//test_vector5();
-	test_vector6();
+	//Test01();
 
-
+	//stl::Test_vector1();
+	//stl::Test_vector2();
+	//stl::Test_vector3();
+	//stl::Test_vector4();
+	//stl::Test_vector5();
+	stl::Test_vector6();
 
 	return 0;
 }
