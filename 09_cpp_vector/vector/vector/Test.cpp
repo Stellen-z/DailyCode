@@ -4,6 +4,8 @@
 
 using namespace std;
 
+#include "vector.h"
+
 void test_constructor1()
 {
 	//vector()
@@ -202,7 +204,7 @@ void TestVectorExpand()
 	}
 }
 
-int main()
+void TEST1()
 {
 	//test_constructor1();
 	//test_constructor2();
@@ -219,7 +221,16 @@ int main()
 	//test_cmpare();
 
 	TestVectorExpand();
+}
 
+/////////////////////////////////////////////////////
+
+
+
+int main()
+{
+	//TEST1();
+	
 
 	return 0;
 }
