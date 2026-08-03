@@ -226,11 +226,154 @@ void TEST1()
 /////////////////////////////////////////////////////
 
 
+namespace stl
+{
+	void test_push_back()
+	{
+		vector<int> v;
+
+		v.push_back(1);
+		v.push_back(2);
+		v.push_back(3);
+
+		print_vector(v);
+		std::cout << v.size() << endl;
+		std::cout << v.capacity() << endl;
+
+		v.resize(10, 1);
+		print_vector(v);
+		std::cout << v.size() << endl;
+		std::cout << v.capacity() << endl;
+
+		v.resize(5);
+		print_vector(v);
+		std::cout << v.size() << endl;
+		std::cout << v.capacity() << endl;
+
+	}
+
+	void test_pop_back()
+	{
+		vector<int> v;
+
+		v.push_back(1);
+		v.push_back(2);
+		v.push_back(3);
+
+		v.pop_back();
+		print_vector(v);
+
+		v.pop_back();
+		print_vector(v);
+
+		v.pop_back();
+		print_vector(v);
+
+		v.pop_back();
+		print_vector(v);
+	}
+
+	void test_insert()
+	{
+		vector<int> v;
+
+		v.push_back(1);
+		v.push_back(2);
+		v.push_back(3);
+		v.push_back(4);
+		v.push_back(5);
+		print_vector(v);
+
+		v.insert(v.begin(), 10);
+		print_vector(v);
+
+		v.insert(v.begin() + 2,20);
+		print_vector(v);
+
+		v.insert(v.end(), 30);
+		print_vector(v);
+
+
+	}
+	void test_erase()
+	{
+		vector<int> v;
+
+		v.push_back(1);
+		v.push_back(2);
+		v.push_back(3);
+		v.push_back(4);
+		v.push_back(5);
+		print_vector(v);
+
+		v.erase(v.begin());
+		print_vector(v);
+
+		v.erase(v.begin() + 2);
+		print_vector(v);
+
+		v.erase(v.end() - 1);
+		print_vector(v);
+
+	}
+	void test_iterator()
+	{
+		vector<int> v;
+
+		v.push_back(1);
+		v.push_back(2);
+		v.push_back(3);
+		v.push_back(4);
+
+
+		v.insert(v.end(), 5);
+		print_vector(v);
+	
+		auto pos = std::find(v.begin(), v.end(), 3);
+		if (pos != v.end())
+		{
+			//v.insert(pos, 10);
+			//此时pos已经失效，不能访问
+			
+			//想要访问就要更新之后再访问
+			pos = v.insert(pos, 10);
+			*(pos + 1) *= 10;
+		}
+
+		print_vector(v);
+
+
+	}
+
+	void test_string()
+	{
+		vector<string> v;
+
+		v.push_back("11111111111111111");
+		v.push_back("11111111111111111");
+		v.push_back("11111111111111111");
+		v.push_back("11111111111111111");
+		print_vector(v);
+
+		v.push_back("11111111111111111");
+		print_vector(v);
+
+
+	}
+
+
+}
 
 int main()
 {
 	//TEST1();
-	
+	//stl::test_push_back();
+	//stl::test_pop_back();
+	//stl::test_insert();
+	//stl::test_erase();
+	//stl::test_iterator();
+	stl::test_string();
+
 
 	return 0;
 }
