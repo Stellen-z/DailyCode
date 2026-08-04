@@ -11,6 +11,7 @@ namespace stl
 	{
 	public:
 		typedef T* iterator;
+		typedef const T* const_iterator;
 	private:
 		iterator _start = nullptr;
 		iterator _finish = nullptr;
@@ -21,12 +22,118 @@ namespace stl
 		vector()
 		{}
 
+		//2.n个val构造
+		vector(size_t n, const T& val = T())
+		{
+			reserve(n);
+
+			for (size_t i = 0; i < n; i++)
+			{
+				push_back(val);
+			}
+		}
+
+		//3.迭代器区间构造
+		template<class InputIterator>
+		vector(InputIterator first, InputIterator last)
+		{
+			//[first,last]
+			size_t n = last - first;
+
+			reserve(n);
+
+			while (first != last)
+			{
+				push_back(*first);
+				++first;
+			}
+
+		}
+
+		vector(int n, const T& val = T())
+		{
+			reserve(n);
+
+			for (size_t i = 0; i < n; i++)
+			{
+				push_back(val);
+			}
+		}
+
+		//4.拷贝构造
+		vector(const vector<T>& val)
+		{
+			reserve(val.size());
+
+			for (auto& e : val)
+			{
+				push_back(e);
+			}
+		}
+
+		void clear()
+		{
+			_finish = _start;
+		}
+		
+		//vector<T>& operator=(const vector<T>& val)
+		//{
+		//	if (this != &val)
+		//	{
+		//		clear();
+
+		//		reserve(val.size());
+
+		//		for (auto& e : val)
+		//		{
+		//			push_back(e);
+		//		}
+		//	}
+
+		//	return *this;
+		//}
+
+		//现代写法
+		void swap(vector<T>& v)
+		{
+			std::swap(_start, v._start);
+			std::swap(_finish, v._finish);
+			std::swap(_end_of_storage, v._end_of_storage);
+		}
+
+		vector<T>& operator=(vector<T>& val)
+		{
+			swap(val);
+
+			return *this;
+		}
+
+		~vector()
+		{
+			if (_start)
+			{
+				delete[] _start;
+
+				_start = _finish = _end_of_storage = nullptr;
+			}
+		}
+
 		iterator begin()
 		{
 			return _start;
 		}
 
 		iterator end()
+		{
+			return _finish;
+		}
+
+		const_iterator begin() const
+		{
+			return _start;
+		}
+
+		const_iterator end() const
 		{
 			return _finish;
 		}
@@ -62,8 +169,7 @@ namespace stl
 			return _start[pos];
 		}
 
-		void push_back(const T& val)
-		{
+		void push_back(const T& val)		{
 			if (_finish == _end_of_storage)
 			{
 				reserve(capacity() == 0 ? 4 : 2 * capacity());
@@ -96,6 +202,7 @@ namespace stl
 			//扩容
 			iterator tmp = new T[n] ;
 			//memcpy(tmp, _start, old_size * sizeof(T));
+			//赋值运算符
 			for (size_t i = 0; i < old_size; i++)
 			{
 				tmp[i] = _start[i];

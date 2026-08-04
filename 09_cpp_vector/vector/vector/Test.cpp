@@ -361,6 +361,28 @@ namespace stl
 
 	}
 
+	void test_constructor()
+	{
+		vector<int> v1(10, 1);
+		vector<string> v2(10, "1111111111");
+
+		print_vector(v1);
+		print_vector(v2);
+
+
+		vector<int> v3(v1);
+		print_vector(v3);
+
+		vector<int> v4(v1.begin(),v1.begin() + 3);
+		print_vector(v4);
+
+		vector<int> v5(v1);
+		print_vector(v3);
+
+		vector<int> v6;
+		v6 = v1;
+		print_vector(v6);
+	}
 
 }
 
@@ -373,7 +395,7 @@ int main()
 	//stl::test_erase();
 	//stl::test_iterator();
 	stl::test_string();
-
+	//stl::test_constructor();
 
 	return 0;
 }
