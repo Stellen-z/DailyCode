@@ -57,10 +57,69 @@ void test2()
 
 }
 
-int main()
+void TEST()
 {
 	//test1();
 	test2();
+}
+
+#include "list.h"
+
+namespace stl
+{
+	void test_push_back()
+	{
+		list<int> lt;
+
+		lt.push_back(1);
+		lt.push_back(2);
+		lt.push_back(3);
+		lt.push_back(4);
+		lt.push_back(4);
+
+
+		list<int>::iterator it = lt.begin();
+		while (it != lt.end())
+		{
+			cout << *it << " ";
+			++it;
+		}
+		cout << endl;
+
+		Print_Container(lt);
+
+	}
+
+
+	void test_operator()
+	{
+		list<AA> lta;
+
+		lta.push_back(AA());
+		lta.push_back(AA());
+		lta.push_back(AA());
+		lta.push_back(AA());
+
+
+		list<AA>::iterator it = lta.begin();
+		while (it != lta.end())
+		{
+			cout << it->_a1 << " " << it->_a2 << endl;;
+			++it;
+		}
+		cout << endl;
+	}
+
+
+}
+
+
+
+int main()
+{
+
+	stl::test_push_back();
+	stl::test_operator();
 
 	return 0;
 }
