@@ -1,125 +1,114 @@
 ﻿#include <iostream>
 #include <list>
-#include <algorithm>
 
-
-using namespace std;
-
-void test1()
+template<class T>
+void print_container(const T& val)
 {
-	list<int> lt;
-	lt.push_back(1);
-	lt.push_back(2);
-	lt.push_back(3);
-	lt.push_back(4);
-
-	list<int>::iterator it = lt.begin();
-	while (it != lt.end())
+	for (auto& e : val)
 	{
-		cout << *it << " ";
+		std::cout << e << " ";
+	}
+	std::cout << std::endl;
+}
+
+void test_constructor()
+{
+	//1.默认构造
+	std::list<int> lt1;
+	print_container(lt1);
+
+	//2.n个val构造
+	std::list<int> lt2(5, 1);
+	print_container(lt2); //1 1 1 1 1
+
+
+	//3.迭代器构造	
+	std::list<int> lt3(lt2.begin(), lt2.end());
+	print_container(lt3); //1 1 1 1 1
+
+
+	//4.拷贝构造
+	std::list<int> lt4(lt3);
+	print_container(lt4); //1 1 1 1 1
+	
+	std::cout << std::endl;
+
+
+	std::list<int> lt5;
+	
+	//赋值重载
+	lt5 = lt4;
+	print_container(lt5);
+
+	//拷贝构造
+	std::list<int> lt6 = lt4;
+	print_container(lt6);
+	
+}
+
+
+void test_iterator()
+{
+	std::list<int> lt(10,1);
+	
+	//正向迭代器
+	std::list<int>::iterator it = lt.begin();
+	while(it != lt.end())
+	{
+		std::cout << *it << " ";
 		++it;
 	}
+	std::cout << std::endl;
 
-	//不支持非随机迭代器
-	//sort(lt.begin(), lt.end());
+	//反向迭代器
+	std::list<int>::reverse_iterator rit = lt.rbegin();
+	while (rit != lt.rend())
+	{
+		std::cout << *rit << " ";
+		++rit;
+	}
+	std::cout << std::endl;
 
-	string s("ackjhls");
-	sort(s.begin(), s.end());
-	cout << s << endl;
+
+	for (const auto& e : lt)
+	{
+		std::cout << e << " ";
+	}
+	std::cout << std::endl;
 
 }
 
-
-void test2()
+void test_capacity()
 {
-	list<double> lt1;
-	lt1.push_back(1.1);
-	lt1.push_back(2.1);
-	lt1.push_back(3.1);
-	lt1.push_back(4.1);
+	std::list<int> lt1;
+	std::list<int> lt2(5, 1);
 
-	list<double> lt2;
-	lt1.push_back(1.3);
-	lt1.push_back(2.3);
-	lt1.push_back(3.3);
-	lt1.push_back(4.3);
-	
-	lt1.sort();
-	lt2.sort();
+	std::cout << lt1.size() << std::endl;
+	std::cout << lt2.size() << std::endl;
 
-	lt1.merge(lt2);
-
-	for (auto& e : lt1)
-	{
-		cout << e << " ";
-	}
-	cout << endl;
+	std::cout << lt1.empty() << std::endl;
+	std::cout << lt2.empty() << std::endl;
 
 }
 
-void TEST()
+void test_access()
 {
-	//test1();
-	test2();
-}
+	std::list<int> lt(5,1);
 
-#include "list.h"
+	lt.front() = 10;
+	lt.back() = 10;
 
-namespace stl
-{
-	void test_push_back()
-	{
-		list<int> lt;
-
-		lt.push_back(1);
-		lt.push_back(2);
-		lt.push_back(3);
-		lt.push_back(4);
-		lt.push_back(4);
-
-
-		list<int>::iterator it = lt.begin();
-		while (it != lt.end())
-		{
-			cout << *it << " ";
-			++it;
-		}
-		cout << endl;
-
-		Print_Container(lt);
-
-	}
-
-
-	void test_operator()
-	{
-		list<AA> lta;
-
-		lta.push_back(AA());
-		lta.push_back(AA());
-		lta.push_back(AA());
-		lta.push_back(AA());
-
-
-		list<AA>::iterator it = lta.begin();
-		while (it != lta.end())
-		{
-			cout << it->_a1 << " " << it->_a2 << endl;;
-			++it;
-		}
-		cout << endl;
-	}
-
-
+	print_container(lt);//10 1 1 1 10
 }
 
 
 
 int main()
 {
-
-	stl::test_push_back();
-	stl::test_operator();
+	//test_constructor();
+	//test_iterator();
+	//test_capacity();
+	test_access();
 
 	return 0;
 }
