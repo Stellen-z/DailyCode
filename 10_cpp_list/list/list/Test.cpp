@@ -101,6 +101,53 @@ void test_access()
 	print_container(lt);//10 1 1 1 10
 }
 
+void test_modify()
+{
+	std::list<int> lt;
+	lt.push_back(1);
+	lt.push_back(2);
+	lt.push_back(3);
+	lt.push_back(4);
+	lt.push_back(5);
+	lt.push_back(6);
+	print_container(lt);
+
+	lt.pop_back();
+	print_container(lt);
+
+
+	lt.push_front(10);
+	lt.push_front(10);
+	print_container(lt);
+
+
+	lt.pop_front();
+	print_container(lt);
+
+	lt.erase(lt.begin());
+	lt.erase(--lt.end());
+	print_container(lt);
+
+	std::list<int> ltt;
+	ltt.swap(lt);
+
+	print_container(lt);
+	print_container(ltt);
+
+	ltt.clear();
+	print_container(ltt);
+}
+
+void test_operations()
+{
+	std::list<int> lt1(5,1);
+	std::list<int> lt1(5,5);
+
+
+
+}
+
+
 
 
 int main()
@@ -108,7 +155,9 @@ int main()
 	//test_constructor();
 	//test_iterator();
 	//test_capacity();
-	test_access();
+	//test_access();
+	//test_modify();
+	test_operations();
 
 	return 0;
 }
