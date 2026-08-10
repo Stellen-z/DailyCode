@@ -1,42 +1,42 @@
-﻿#pragma once
-#include <iostream>
-#include <assert.h>
-
+﻿#include <iostream>
+#include <algorithm>
 
 namespace stl
 {
+	//节点
 	template<class T>
 	struct list_node
 	{
+		typedef list_node<T> Node;
+
 		list_node(const T& data = T())
 			:_data(data)
+			, _prev(nullptr)
 			, _next(nullptr)
-			,_prev(nullptr)
 		{}
 
 		T _data;
-		list_node<T>* _next;
 		list_node<T>* _prev;
+		list_node<T>* _next;
 	};
-		
 
-	//T  T&  T*
-	//T const T& const T*
-	template<class T,class Ref,class Ptr>
+	//迭代器
 	//template<class T>
+	template<class T,class Ref,class Ptr>
 	struct list_iterator
 	{
 		typedef list_node<T> Node;
-		typedef list_iterator<T, Ref, Ptr> Self;
-
-		Node* _node;
+		typedef list_iterator<T,T&,T*> iterator;
+		typedef list_iterator<T,const T&,const T*> const_iterator;
+		typedef list_iterator<T,Ref,Ptr> Self;
 
 		list_iterator(Node* node)
 			:_node(node)
 		{}
 
+		Node* _node;
 
-		Ref operator*()
+		Ref& operator*()
 		{
 			return _node->_data;
 		}
@@ -46,7 +46,6 @@ namespace stl
 			return &_node->_data;
 		}
 
-
 		Self& operator++()
 		{
 			_node = _node->_next;
@@ -54,11 +53,10 @@ namespace stl
 			return *this;
 		}
 
-		//后置++
 		Self operator++(int)
 		{
 			Self tmp(*this);
-
+			
 			_node = _node->_next;
 
 			return tmp;
@@ -71,7 +69,7 @@ namespace stl
 			return *this;
 		}
 
-		Self& operator--(int)
+		Self operator--(int)
 		{
 			Self tmp(*this);
 
@@ -79,47 +77,50 @@ namespace stl
 
 			return tmp;
 		}
+		
+		bool operator==(const Self& s) const
+		{
+			return _node == s._node;
+		}
 
 		bool operator!=(const Self& s) const
 		{
 			return _node != s._node;
 		}
 
-		bool operator==(const Self& s) const
-		{
-			return _node == s._node;
-		}
 	};
 
 	//const_iterator
-	//const T* ptr;
-	//const * T ptr
 	//template<class T>
 	//struct list_const_iterator
 	//{
 	//	typedef list_node<T> Node;
 	//	typedef list_const_iterator<T> Self;
 
-	//	Node* _node;
-
 	//	list_const_iterator(Node* node)
 	//		:_node(node)
 	//	{}
 
+	//	Node* _node;
 
-	//	const T& operator*()
+	//	const T& operator*() const 
 	//	{
 	//		return _node->_data;
 	//	}
-
-	//	const Self& operator++() 
+	// 
+	// 
+	//  const T* operator->() const 
+	// {
+	//	    return &_node->_data;
+	// }
+	// 
+	//	Self& operator++()
 	//	{
 	//		_node = _node->_next;
 
 	//		return *this;
 	//	}
 
-	//	//后置++
 	//	Self operator++(int)
 	//	{
 	//		Self tmp(*this);
@@ -136,7 +137,7 @@ namespace stl
 	//		return *this;
 	//	}
 
-	//	Self& operator--(int)
+	//	Self operator--(int)
 	//	{
 	//		Self tmp(*this);
 
@@ -145,36 +146,39 @@ namespace stl
 	//		return tmp;
 	//	}
 
+	//	bool operator==(const Self& s) const
+	//	{
+	//		return _node == s._node;
+	//	}
 
 	//	bool operator!=(const Self& s) const
 	//	{
 	//		return _node != s._node;
 	//	}
 
-	//	bool operator==(const Self& s) const
-	//	{
-	//		return _node == s._node;
-	//	}
 	//};
+
 
 	template<class T>
 	class list
 	{
-		typedef list_node<T> Node;
 	public:
-		typedef list_iterator < T, T&, T* > iterator;
-		typedef list_iterator < T, const T&, const T* > const_iterator;
+		typedef list_node<T> Node;
+		typedef list_iterator<T,T&,T*> iterator;
+		typedef list_iterator<T,const T&,const T*> const_iterator;
+
 	private:
 		Node* _head;
 		size_t _size;
-
 	public:
+		//默认构造
 
 		void empty_init()
 		{
-			_head = new Node();
-			_head->_next = _head;
+			_head = new Node;
 			_head->_prev = _head;
+			_head->_next = _head;
+
 			_size = 0;
 		}
 
@@ -183,9 +187,50 @@ namespace stl
 			empty_init();
 		}
 
-
-		list(list<T>& lt)
+		//n个val构造
+		list(size_t n, const T& val = T())
 		{
+			//先创建头节点
+			empty_init();
+
+			for (size_t i = 1; i <= n; i++)
+			{
+				push_back(val);
+			}
+		}
+
+		list(int n, const T& val = T())
+		{
+			//先创建头节点
+			empty_init();
+
+			for (size_t i = 1; i <= n; i++)
+			{
+				push_back(val);
+			}
+		}
+
+
+		//迭代器区间构造
+		template <class InputIterator>
+		list(InputIterator first, InputIterator last)
+		{
+			//先创建头节点
+			empty_init();
+
+			auto it = first;
+			while (it != last)
+			{
+				push_back(*it);
+				++it;
+			}
+		}
+
+
+		//拷贝构造
+		list(const list<T>& lt)
+		{
+			//先创建头节点
 			empty_init();
 
 			for (auto& e : lt)
@@ -196,10 +241,11 @@ namespace stl
 
 		void swap(list<T>& lt)
 		{
-			std::swap(lt->_head);
-			std::swap(lt->_size);
+			std::swap(_head, lt._head);
+			std::swap(_size, lt._size);
 		}
 
+		//现代写法
 		list& operator=(list<T> lt)
 		{
 			swap(lt);
@@ -209,21 +255,32 @@ namespace stl
 
 		void clear()
 		{
-			list<T>::iterator it = begin();
-
+			auto it = begin();
 			while (it != end())
 			{
-				//更新it
 				it = erase(it);
 			}
 		}
 
+
 		~list()
 		{
 			clear();
-			
+
 			delete _head;
 			_head = nullptr;
+
+			_size = 0;
+		}
+
+		size_t size()
+		{
+			return _size;
+		}
+
+		bool empty()
+		{
+			return _size == 0;
 		}
 
 		iterator begin()
@@ -233,7 +290,7 @@ namespace stl
 
 		iterator end()
 		{
-			return _head;
+			return _head->_prev->_next;
 		}
 
 		const_iterator begin() const
@@ -243,72 +300,22 @@ namespace stl
 
 		const_iterator end() const
 		{
-			return _head;
+			return _head->_prev->_next;
 		}
 		
+		void push_back(const T& val = T());
 
-		size_t size() const
+		iterator insert(iterator pos, const T& val);
+		iterator erase(iterator pos);
+		
+		void push_front(const T& val)
 		{
-			return _size;
+			insert(begin(), val);
 		}
 		
-		bool empty() const
+		void pop_front()
 		{
-			return _size == 0;
-		}
-
-		void push_back(const T& x = T())
-		{
-			Node* newnode = new Node(x);
-			//找尾节点
-			Node* tail = _head->_prev;
-
-			tail->_next = newnode;
-			newnode->_prev = tail;
-			newnode->_next = _head;
-			_head->_prev = newnode;
-
-			++_size;
-		}
-
-		void push_front(const T& x = T())
-		{
-			insert(begin(), x);
-		}
-
-		iterator insert(iterator pos, const T& x = T())
-		{
-			Node* cur = pos._node;
-			Node* prev = cur->_prev;
-			Node* newnode = new Node(x);
-
-			//prev  newnode cur 
-			newnode->_prev = prev;
-			newnode->_next = cur;
-			prev->_next = newnode;
-			cur->_prev = newnode;
-
-			++_size;
-
-			return cur;
-		}
-
-		iterator erase(iterator pos)
-		{
-			assert(pos != end());
-			Node* cur = pos._node;
-			Node* prev = cur->_prev;
-			Node* next = cur->_next;
-
-			prev->_next = next;
-			next->_prev = prev;
-
-			delete cur;
-			cur = nullptr;
-
-			--_size;
-
-			return next;
+			erase(begin());
 		}
 
 		void pop_back()
@@ -316,36 +323,71 @@ namespace stl
 			erase(--end());
 		}
 
-		void pop_front()
-		{
-			erase(begin());
-		}
 
 	};
 
-	struct AA
+	template<class T>
+	void list<T>::push_back(const T& val)
 	{
-		int _a1 = 1;
-		int _a2 = 1;
-	};
+		Node* newnode = new Node(val);
 
-	template<class Container>
-	void Print_Container(const Container& con)
-	{
-		//typename Container::const_iterator it = con.begin();
-		//while (it != con.end())
-		//{
-		//	cout << *it << " ";
-		//	++it;
-		//}
-		//cout << endl;
+		_head->_prev->_next = newnode;
+		newnode->_prev = _head->_prev;
+		newnode->_next = _head;
+		_head->_prev = newnode;
 
-		for (const auto& e : con)
-		{
-			cout << e << " ";
-		}
-		cout << endl;
+		_size++;
 	}
 
+	template<class Con>
+	void print_container(const Con& con)
+	{
+		for (const auto& e : con)
+		{
+			std::cout << e << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	struct A
+	{
+		int _a = 1;
+		int _b = 1;
+	};
+
+	template<class T>
+	list<T>::iterator list<T>::insert(iterator pos, const T& val)
+	{
+		Node* newnode = new Node(val);
+		Node* cur = pos._node;
+		Node* prev = cur->_prev;
+
+		newnode->_prev = prev;
+		newnode->_next = cur;
+		cur->_prev = newnode;
+		prev->_next = newnode;
+
+		++_size;
+
+		return newnode;
+	}
+
+	template<class T>
+	list<T>::iterator list<T>::erase(iterator pos)
+	{
+		Node* cur = pos._node;
+		Node* prev = cur->_prev;
+		Node* next = cur->_next;
+
+		prev->_next = next;
+		next->_prev = prev;
+
+		delete cur;
+		cur = nullptr;
+
+		--_size;
+
+		return next;
+	}
 
 }

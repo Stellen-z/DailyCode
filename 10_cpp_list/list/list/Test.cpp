@@ -138,26 +138,242 @@ void test_modify()
 	print_container(ltt);
 }
 
-void test_operations()
+void test_splice()
 {
 	std::list<int> lt1(5,1);
-	std::list<int> lt1(5,5);
+	std::list<int> lt2(5,2);
+	std::list<int> lt3(5,3);
+	std::list<int> lt4(5,4);
 
+
+	//void splice (iterator position, list& x);
+	lt1.splice(lt1.begin(),lt2);
+	print_container(lt1);
+
+	//void splice (iterator position, list& x, iterator i);
+	lt1.splice(lt1.begin(), lt3, lt3.begin());
+	print_container(lt1);
+
+	//void splice (iterator position, list& x, iterator first, iterator last);
+	lt1.splice(lt1.begin(), lt4, lt4.begin(), lt4.end());
+	print_container(lt1);
+
+}
+
+bool is_odd(const int& val)
+{
+	return val % 2 == 1;
+}
+
+void test_remove()
+{
+	std::list<int> lt;
+	lt.push_back(1);
+	lt.push_back(2);
+	lt.push_back(3);
+	lt.push_back(4);
+	lt.push_back(5);
+	lt.push_back(4);
+	lt.push_back(3);
+	lt.push_back(2);
+	lt.push_back(1);
+
+	//void remove (const value_type& val);
+	lt.remove(2);
+	print_container(lt);
+	
+	//template <class Predicate>
+	//void remove_if(Predicate pred);
+	lt.remove_if(is_odd);
+	print_container(lt);
+
+
+}
+
+void test_operations()
+{
+	std::list<int> lt1;
+	lt1.push_back(1);
+	lt1.push_back(2);
+	lt1.push_back(3);
+	lt1.push_back(2);
+	lt1.push_back(1);
+	print_container(lt1);
+
+	//先排序再去重
+	lt1.sort();
+	lt1.unique();
+	print_container(lt1);// 1 2 3
+
+	std::list<int> lt2;
+	lt2.push_back(5);
+	lt2.push_back(6);
+	lt2.push_back(7);
+	lt2.push_back(8);
+	print_container(lt2);
+
+	lt1.sort();
+	lt2.sort();
+
+	//merge要求两个已排序的list
+	//void merge (list& x)
+	lt1.merge(lt2);
+	print_container(lt1);
+
+
+	lt1.reverse();
+	print_container(lt1);
+
+}
+
+
+void TEST1()
+{
+	test_constructor();
+	test_iterator();
+	test_capacity();
+	test_access();
+	test_modify();
+	test_splice();
+	test_remove();
+	test_operations();
+}
+
+#include "list.h"
+
+namespace stl
+{
+	void Test_iterator()
+	{
+		list<int> lt;
+
+		lt.push_back(1);
+		lt.push_back(2);
+		lt.push_back(3);
+		lt.push_back(4);
+		lt.push_back(5);
+
+		list<int>::iterator it = lt.begin();
+		while (it != lt.end())
+		{
+			std::cout << *it << " ";
+			++it;
+		}
+		std::cout << std::endl;
+
+
+	}
+
+
+	void Test_customtypes()
+	{
+		list<A> lt;
+		lt.push_back(A());
+		lt.push_back(A());
+		lt.push_back(A());
+		lt.push_back(A());
+		lt.push_back(A());
+
+
+		list<A>::iterator it = lt.begin();
+		while (it != lt.end())
+		{
+			//std::cout << *it << " ";
+			//std::cout << (*it)._a << " " << (*it)._b << std::endl;
+			std::cout << it->_a << " " << it->_b << std::endl;
+			//std::cout << it.operator->()->_a << " " << it.operator->()->_b << std::endl;
+			++it;
+		}
+		std::cout << std::endl;
+	}
+	void Test_insert()
+	{
+		list<int> lt;
+
+		lt.push_back(1);
+		lt.push_back(2);
+		lt.push_back(3);
+		lt.push_back(4);
+		lt.push_back(5);
+		print_container(lt);
+
+		lt.insert(lt.begin(),10);
+		lt.insert(lt.end(), 20);
+		lt.insert(++lt.begin(), 10);
+		print_container(lt);
+
+		lt.erase(lt.begin());
+		print_container(lt);
+
+		lt.erase(--lt.end());
+		print_container(lt);
+
+		lt.erase(++lt.begin());
+		print_container(lt);
+
+
+	}
+
+	void Test_push_pop()
+	{
+		list<int> lt;
+
+		lt.push_back(1);
+		lt.push_back(2);
+		lt.push_back(3);
+		lt.push_back(4);
+		lt.push_back(5);
+		print_container(lt);
+
+
+		lt.push_front(10);
+		print_container(lt);
+
+		lt.pop_back();
+		print_container(lt);
+
+		lt.pop_front();
+		print_container(lt);
+
+	}
+
+	void Test_constructor()
+	{
+		//1.默认构造
+		list<int> lt1;
+		print_container(lt1);
+
+		//2.n个val构造
+		list<int> lt2(10, 1);
+		print_container(lt2);
+
+		//3.迭代器区间构造
+		list<int> lt3(++lt2.begin(), --lt2.end());
+		print_container(lt3);
+
+		//4.拷贝构造
+		list<int> lt4(lt3);
+		print_container(lt4);
+
+		//两个已经存在的对象才会调用=
+		list<int> lt5;
+		lt5 = lt4;
+		print_container(lt5);
+
+	}
 
 
 }
 
 
-
-
 int main()
 {
-	//test_constructor();
-	//test_iterator();
-	//test_capacity();
-	//test_access();
-	//test_modify();
-	test_operations();
+	//TEST1();
 
+	//stl::Test_iterator();
+	//stl::Test_customtypes();
+	//stl::Test_insert();
+	//stl::Test_push_pop();
+	stl::Test_constructor();
 	return 0;
 }
