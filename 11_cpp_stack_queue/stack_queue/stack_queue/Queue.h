@@ -1,13 +1,11 @@
 ﻿#pragma once
+#include <list>
 
 namespace stl
 {
-	//Container适配转换出queue
-	template<class T, class Container = list<T>>
+	template<class T,class Container = std::deque<T>>
 	class queue
 	{
-	private:
-		Container _con;
 	public:
 		void push(const T& x)
 		{
@@ -19,9 +17,19 @@ namespace stl
 			_con.pop_front();
 		}
 
+		T& front()
+		{
+			return _con.front();
+		}
+
 		const T& front() const
 		{
 			return _con.front();
+		}
+
+		T& back()
+		{
+			return _con.back();
 		}
 
 		const T& back() const
@@ -38,6 +46,7 @@ namespace stl
 		{
 			return _con.empty();
 		}
-
+	private:
+		Container _con;
 	};
 }

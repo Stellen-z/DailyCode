@@ -1,15 +1,12 @@
 ﻿#pragma once
+#include <deque>
 
 namespace stl
 {
-	//Container适配转换出stack
-	template<class T,class Container = vector<T>>
+	template<class T,class Container = std::deque<T>>
 	class stack
 	{
-	private:
-		Container _con;
 	public:
-		//栈顶在尾
 		void push(const T& x)
 		{
 			_con.push_back(x);
@@ -20,20 +17,28 @@ namespace stl
 			_con.pop_back();
 		}
 
+		T& top()
+		{
+			return _con.back();
+		}
+
 		const T& top() const
 		{
 			return _con.back();
 		}
 
-		const size_t size() const 
+		const size_t size() const
 		{
 			return _con.size();
 		}
 
-		bool empty()
+		bool empty() const
 		{
 			return _con.empty();
 		}
 
+
+	private:
+		Container _con;
 	};
 }
