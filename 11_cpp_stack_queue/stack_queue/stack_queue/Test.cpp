@@ -1,6 +1,13 @@
 ﻿#include <iostream>
 #include <stack>
 #include <queue>
+#include <vector>
+
+
+
+#include "Stack.h"
+#include "Queue.h"
+#include "PriorityQueue.h"
 
 void test_stack()
 {
@@ -46,8 +53,81 @@ void test_queue()
 	std::cout << std::endl;
 }
 
-#include "Stack.h"
-#include "Queue.h"
+//template <class T>
+//class Less
+//{
+//public:
+//	bool operator()(const T& x, const T& y)
+//	{
+//		return x < y;
+//	}
+//};
+//
+//template <class T>
+//class Greater
+//{
+//public:
+//	bool operator()(const T& x, const T& y)
+//	{
+//		return x > y;
+//	}
+//};
+
+void test_priority_queue()
+{
+	//默认大根堆
+	std::priority_queue<int> pq;
+
+	pq.push(1);
+	pq.push(3);
+	pq.push(3);
+	pq.push(5);
+	pq.push(7);
+	pq.push(7);
+
+	std::cout << pq.size() << std::endl;
+
+
+	while (!pq.empty())
+	{
+		std::cout << pq.top() << " ";
+		pq.pop();
+	}
+	std::cout << std::endl;
+}
+
+void test_functor()
+{
+	std::vector<int> v{ 2,6,8,3,6,9,1,2,7 };
+
+	//大根堆
+	std::priority_queue<int, std::vector<int>, Less<int>> Lpq;
+	//小根堆
+	std::priority_queue<int, std::vector<int>, Greater<int>> Gpq;
+
+	for (const auto& e : v)
+	{
+		Lpq.push(e);
+		Gpq.push(e);
+	}
+
+	std::cout << "大根堆:";
+	while (!Lpq.empty())
+	{
+		std::cout << Lpq.top() << " ";
+		Lpq.pop();
+	}
+	std::cout << std::endl;
+
+	std::cout << "小根堆:";
+	while (!Gpq.empty())
+	{
+		std::cout << Gpq.top() << " ";
+		Gpq.pop();
+	}
+	std::cout << std::endl;
+
+}
 
 namespace stl
 {
@@ -94,6 +174,41 @@ namespace stl
 		std::cout << std::endl;
 	}
 
+	void test_priority_queue()
+	{
+		std::vector<int> v{ 2,6,8,3,6,9,1,2,7 };
+
+		//大根堆
+		priority_queue<int, std::vector<int>, Less<int>> Lpq;
+		std::cout << typeid(Lpq).name() << std::endl;
+		//小根堆
+		priority_queue<int, std::vector<int>, Greater<int>> Gpq;
+		std::cout << typeid(Gpq).name() << std::endl;
+
+		for (const auto& e : v)
+		{
+			Lpq.push(e);
+			Gpq.push(e);
+		}
+
+		std::cout << "大根堆:";
+		while (!Lpq.empty())
+		{
+			std::cout << Lpq.top() << " ";
+			Lpq.pop();
+		}
+		std::cout << std::endl;
+
+		std::cout << "小根堆:";
+		while (!Gpq.empty())
+		{
+			std::cout << Gpq.top() << " ";
+			Gpq.pop();
+		}
+		std::cout << std::endl;
+
+	}
+
 }
 
 
@@ -102,9 +217,12 @@ namespace stl
 int main()
 {
 	//test_stack();
-	stl::test_stack();
+	//stl::test_stack();
 	//test_queue();
-	stl::test_queue();
+	//stl::test_queue();
+	//test_priority_queue();
+	//test_functor();
+	stl::test_priority_queue();
 
 	return 0;
 }

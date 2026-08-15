@@ -1,13 +1,9 @@
-﻿#pragma once
+﻿#include <vector>
 
-#include <vector>
-
-//仿函数
 template <class T>
 class Less
 {
 public:
-	//没有成员变量，大小为1字节
 	bool operator()(const T& x, const T& y)
 	{
 		return x < y;
@@ -18,33 +14,29 @@ template <class T>
 class Greater
 {
 public:
-	//没有成员变量，大小为1字节
 	bool operator()(const T& x, const T& y)
 	{
 		return x > y;
 	}
 };
 
-
 namespace stl
 {
-	//类模板参数传类型，函数参数传对象
-	//默认建大堆，升序
-	template<class T, class Container = std::vector<T>,class Compare = Less<T>>
+	template<class T, class Container = std::vector<T>, class Compare = Less<T>>
 	class priority_queue
 	{
 	private:
 		Container _con;
+		Compare _cmp;
 	public:
-
 		void AdjustUp(size_t child)
 		{
-			Compare _cmp;
 			size_t parent = (child - 1) / 2;
 			while (child > 0)
 			{
-				//if (_con[parent] < _con[child])
-				if (_cmp(_con[parent],_con[child]))
+				//Less:父节点 < 孩子节点 -> 大根堆 
+				//Greater:父节点 > 孩子节点 -> 小根堆 
+				if (_cmp(_con[parent], _con[child]))
 				{
 					std::swap(_con[parent], _con[child]);
 					child = parent;
@@ -54,28 +46,28 @@ namespace stl
 			}
 		}
 
-		void push(const T& x)
+		void AdjustDown(size_t parent)
 		{
-			_con.push_back(x);
-			AdjustUp(_con.size() - 1);
-		}
-
-		void AdjustDown(int parent)
-		{
-			Compare _cmp;
-			int child = parent * 2 + 1;
+			size_t child = parent * 2 + 1;
 			while (child < _con.size())
 			{
-				if (child + 1 < _con.size() && _cmp(_con[child],_con[child + 1])) ++child;
-				//if (_con[parent] < _con[child])
-				if (_cmp(_con[parent],_con[child]))
+				if(child + 1 < _con.size() && _cmp(_con[child],_con[child + 1])) ++child;
+				//Less:父节点 < 孩子节点 -> 大根堆 
+				//Greater:父节点 > 孩子节点 -> 小根堆 
+				if (_cmp(_con[parent], _con[child]))
 				{
-					std::swap(_con[child], _con[parent]);
+					std::swap(_con[parent], _con[child]);
 					parent = child;
 					child = parent * 2 + 1;
 				}
 				else break;
 			}
+		}
+		
+		void push(const T& x)
+		{
+			_con.push_back(x);
+			AdjustUp(_con.size() - 1);
 		}
 
 		void pop()
@@ -85,9 +77,14 @@ namespace stl
 			AdjustDown(0);
 		}
 
-		const T& top()
+		T& top()
 		{
-			return _con[0];
+			return _con.front();
+		}
+
+		const T& top() const
+		{
+			return _con.front();
 		}
 
 		const size_t size() const
@@ -95,10 +92,14 @@ namespace stl
 			return _con.size();
 		}
 
-		bool empty()
+		bool empty() const
 		{
 			return _con.empty();
 		}
 
+	
+
+
 	};
+
 }
