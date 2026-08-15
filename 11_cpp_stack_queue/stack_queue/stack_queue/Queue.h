@@ -42,7 +42,7 @@ namespace stl
 			return _con.size();
 		}
 
-		bool empty()
+		bool empty() const
 		{
 			return _con.empty();
 		}
