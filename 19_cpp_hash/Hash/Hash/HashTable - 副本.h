@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <vector>
-#include <iostream>
+
 
 enum State
 {
@@ -160,105 +160,23 @@ namespace openaddress
 
 namespace hash_bucket
 {
-	template<class T>
+	template<class K,class V>
 	struct HashNode
 	{
-		HashNode<T>* _next;
-		T _data;
+		HashNode<K, V>* _next;
+		std::pair<K, V> _kv;
 
-		HashNode(const T& data)
-			:_data(data)
+		HashNode(const std::pair<K, V>& kv)
+			:_kv(kv)
 			, _next(nullptr)
 		{}
 	};
 
-	//前置声明
-	template<class K, class T, class KeyOfT, class Hash = HashFunc<K>>
-	class HashTable;
-
-	template<class K,class T,class KeyOfT,class Ref,class Ptr,class Hash>
-	struct HashIterator
-	{
-		using Node = HashNode<T>;
-		using HT = HashTable<K, T, KeyOfT,Hash>;
-		using Self = HashIterator<K, T, KeyOfT, Ref, Ptr,Hash>;
-
-		Node* _node;
-		const HT* _ht;
-
-		HashIterator(Node* node, const HT* ht)
-			:_ht(ht)
-			, _node(node)
-		{}
-
-
-		Ref operator*()
-		{
-			return _node->_data;
-		}
-
-		Ptr operator->()
-		{
-			return &_node->_data;
-		}
-
-		Self operator++()
-		{
-			if (_node->_next)
-			{
-				//当前桶内还有节点
-				_node = _node->_next;
-			}
-			else
-			{
-				//寻找下一个桶
-				Hash hash;
-				KeyOfT kot;
-
-				size_t hashi = hash(kot(_node->_data)) % _ht->_table.size();
-				
-				//从下一个桶开始
-				++hashi;
-				while (hashi < _ht->_table.size())
-				{
-					_node = _ht->_table[hashi];
-
-					if (_node) break;
-					else ++hashi;
-				}
-
-				if (hashi == _ht->_table.size())
-				{
-					_node = nullptr;
-				}
-			}
-
-			return *this;
-		}
-
-		bool operator==(const Self& s)
-		{
-			return _node == s._node;
-		}
-
-		bool operator!=(const Self& s)
-		{
-			return _node != s._node;
-		}
-	};
-
-
-	template<class K,class T,class KeyOfT,class Hash>
+	template<class K,class V,class Hash = HashFunc<K>>
 	class HashTable
 	{
-		//友元
-		template<class K, class T, class KeyOfT, class Ref, class Ptr, class Hash>
-		friend struct HashIterator;
-
 	public:
-		using Node = HashNode<T>;
-		using iterator = HashIterator<K, T, KeyOfT, T&, T*,Hash>;
-		using const_iterator = HashIterator<K, T, KeyOfT, const T&, const T*,Hash>;
+		using Node = HashNode<K, V>;
 
 		HashTable(size_t size = __stl_next_prime(0))
 			:_table(size)
@@ -312,43 +230,6 @@ namespace hash_bucket
 			}
 		}
 
-		iterator Begin()
-		{
-			if (_n == 0) return End();
-
-			for (int i = 0; i < _table.size(); i++)
-			{
-				Node* cur = _table[i];
-				if (cur) return iterator(cur, this);
-			}
-
-			return End();
-		}
-
-		iterator End()
-		{
-			return iterator(nullptr, this);
-		}
-
-		const_iterator Begin() const
-		{
-			if (_n == 0) return End();
-
-			for (int i = 0; i < _table.size(); i++)
-			{
-				Node* cur = _table[i];
-				if (cur) return const_iterator(cur, this);
-			}
-
-			return End();
-		}
-
-		const_iterator End() const
-		{
-			return const_iterator(nullptr, this);
-
-		}
-
 		HashTable& operator=(const HashTable& ht)
 		{
 			if (this != &ht)
@@ -378,12 +259,9 @@ namespace hash_bucket
 			return *this;
 		}
 
-
-		std::pair<iterator, bool> Insert(const T& data)
+		bool Insert(const std::pair<K,V>& kv)
 		{
-			KeyOfT kot;
-			auto it = Find(kot(data));
-			if (it != End()) return { it,false };
+			if (Find(kv.first)) return false;
 
 			Hash hash;
 			//负载因子 >= 1 --> 扩容
@@ -399,7 +277,7 @@ namespace hash_bucket
 						Node* next = cur->_next;
 						
 						//newtable 元素个数已改变，映射关系重新计算
-						size_t hashi = hash(kot(cur->_data)) % _newtable.size();
+						size_t hashi = hash(cur->_kv.first) % _newtable.size();
 						cur->_next = _newtable[hashi];
 						_newtable[hashi] = cur;
 
@@ -412,31 +290,29 @@ namespace hash_bucket
 				_table.swap(_newtable);
 			}
 			
-			size_t hashi = hash(kot(data)) % _table.size();
+			size_t hashi = hash(kv.first) % _table.size();
 			//头插
-			Node* newnode = new Node(data);
+			Node* newnode = new Node(kv);
 			newnode->_next = _table[hashi];
 			_table[hashi] = newnode;
 			++_n;
 
-			return { iterator(newnode,this) ,true };
+			return true;
 		}
 
-		iterator Find(const K& key)
+		Node* Find(const K& key)
 		{
 			Hash hash;
-			KeyOfT kot;
-
 			size_t hashi = hash(key) % _table.size();
 
 			Node* cur = _table[hashi];
 			while (cur)
 			{
-				if (kot(cur->_data) == key) return iterator(cur,this);
+				if (cur->_kv.first == key) return cur;
 
 				cur = cur->_next;
 			}
-			return End();
+			return nullptr;
 		}
 
 		bool Erase(const K& key)
@@ -448,7 +324,7 @@ namespace hash_bucket
 			Node* prev = nullptr;
 			while (cur)
 			{
-				if (cur->kot(cur->_data) == key)
+				if (cur->_kv.first == key)
 				{
 					if (prev == nullptr)
 					{
@@ -477,9 +353,6 @@ namespace hash_bucket
 		}
 
 	private:
-
-
-
 		std::vector<Node*> _table;
 		size_t _n;
 	};
