@@ -1,35 +1,6 @@
-﻿#pragma once
+﻿#include <iostream>
 #include <vector>
-#include <iostream>
 
-enum State
-{
-	EXIST,
-	EMPTY,
-	DELETE
-};
-
-inline unsigned long __stl_next_prime(unsigned long n)
-{
-	// Note: assumes long is at least 32 bits.
-	static const int __stl_num_primes = 28;
-	static const unsigned long __stl_prime_list[__stl_num_primes] =
-	{
-			53,         97,         193,        389,        769,
-			1543,       3079,       6151,       12289,      24593,
-			49157,      98317,      196613,     393241,     786433,
-			1572869,    3145739,    6291469,    12582917,   25165843,
-			50331653,   100663319,  201326611,  402653189,  805306457,
-			1610612741, 3221225473, 4294967291
-	};
-	const unsigned long* first = __stl_prime_list;
-	const unsigned long* last = __stl_prime_list +
-		__stl_num_primes;
-	const unsigned long* pos = std::lower_bound(first, last, n);
-	return pos == last ? *(last - 1) : *pos;
-}
-
-//转成 size_t
 template<class K>
 struct HashFunc
 {
@@ -39,97 +10,250 @@ struct HashFunc
 	}
 };
 
-//模板特化
 template<>
 struct HashFunc<std::string>
 {
 	size_t operator()(const std::string& s)
 	{
-		size_t hash = 0;
+		size_t ch = 0;
 		for (auto& e : s)
 		{
-			hash += e;
-			hash *= 131;
+			ch += e;
+			ch *= 131;
 		}
-		return hash;
+
+		return ch;
 	}
 };
 
-namespace openaddress
+inline unsigned long __stl_next_prime(unsigned long n)
 {
-	template<class K, class V>
-	struct HashData
+	// Note: assumes long is at least 32 bits.
+	static const int __stl_num_primes = 28;
+	static const unsigned long __stl_prime_list[__stl_num_primes] =
 	{
-		std::pair<K, V> _kv;
-		State _state = EMPTY;
-
+	  53,         97,         193,       389,       769,
+	  1543,       3079,       6151,      12289,     24593,
+	  49157,      98317,      196613,    393241,    786433,
+	  1572869,    3145739,    6291469,   12582917,  25165843,
+	  50331653,   100663319,  201326611, 402653189, 805306457,
+	  1610612741, 3221225473, 4294967291
 	};
 
+	const unsigned long* first = __stl_prime_list;
+	const unsigned long* last = __stl_prime_list + __stl_num_primes;
+	const unsigned long* pos = std::lower_bound(first, last, n);
+	return pos == last ? *(last - 1) : *pos;
+}
 
-	template<class K, class V,class Hash = HashFunc<K>>
+namespace open_address
+{
+	enum State
+	{
+		EMPTY,
+		DELETE,
+		EXIST
+	};
+
+	template<class K,class V>
+	struct HashData
+	{
+		std::pair<K,V> _kv;
+		State _state;
+
+		HashData() = default;
+	};
+
+	template<class K, class V, class Hash = HashFunc<K>>
 	class HashTable
 	{
 	public:
+
+
 		HashTable()
-			:_tables(__stl_next_prime(0))
+			:_table(__stl_next_prime(0)) // 默认先开10个空间
 			, _n(0)
 		{}
 
-
-
-		bool Insert(const std::pair<K, V>& kv)
+		bool Insert(const std::pair<K,V>& kv)
 		{
-			if (Find(kv.first)) return false;
 			Hash hash;
-			//负载因子 >= 0.7
-			if (_n * 10 / _tables.size() >= 7)
+
+			if (Find(kv.first)) return false;
+
+			//扩容
+			if (_n * 10 / _table.size() == 7)
 			{
-				//扩容
-				HashTable<K, V,Hash> newht;
-				newht._tables.resize(__stl_next_prime(_tables.size() + 1));
+				HashTable<K, V> newht;
+				newht._table.resize(__stl_next_prime(_table.size() + 1));
 
-				for (auto& e : _tables)
+				for (auto& e : _table)
 				{
-					if (e._state == EXIST) newht.Insert(e._kv);
+					if (e._state == EXIST)
+					{
+						newht.Insert(e._kv);
+					}
 				}
-
-				_tables.swap(newht._tables);
+				
+				_table.swap(newht._table);
 			}
 
-			size_t hash0 = hash(kv.first) % _tables.size();
+			//线性探测
+			size_t hash0 = hash(kv.first) % _table.size(); // 冲突位置
 			size_t hashi = hash0;
 			size_t i = 1;
-			while (_tables[hashi]._state == EXIST)
+			while (_table[hashi]._state == EXIST)
 			{
-				hashi = (hash0 + i) % _tables.size();
+				// 到表尾直接回到表头
+				hashi = (hash0 + i) % _table.size();
 				++i;
 			}
 
-			_tables[hashi]._kv = kv;
-			_tables[hashi]._state = EXIST;
+			// hashi即为空位置
+			_table[hashi]._kv = kv;
+			_table[hashi]._state = EXIST;
 			++_n;
 
 			return true;
 		}
 
-		HashData<K, V>* Find(const K& key)
+		HashData<K,V>* Find(const K& key)
 		{
 			Hash hash;
-
-			size_t hash0 = hash(key) % _tables.size();
+			if (_n == 0) return nullptr;
+				
+			size_t hash0 = hash(key) % _table.size();
 			size_t hashi = hash0;
-			size_t i = 0;
+			size_t i = 1;
 
-			while (_tables[hashi]._state != EMPTY)
+			while (_table[hashi]._state != EMPTY)
 			{
-				//由于循环条件是非空，可能是删除或存在，因此判断是必须存在且相等
-				if (_tables[hashi]._state == EXIST && _tables[hashi]._kv.first == key)
+				if (_table[hashi]._state == EXIST &&
+					_table[hashi]._kv.first == key)
 				{
-					return &_tables[hashi];
+					return &_table[hashi];
 				}
 
-				hashi = (hash0 + i) % _tables.size();
+				hashi = (hash0 + i) % _table.size();
 				++i;
+			}
+
+			return nullptr;
+		}
+		
+		bool Erase(const K& key)
+		{
+			HashData<K, V>* ret = Find(key);
+			if (ret == nullptr) return false;
+
+			ret->_state = DELETE;
+			--_n;
+
+			return true;
+		}
+
+	private:
+		std::vector<HashData<K,V>> _table;
+		size_t _n;  //元素个数
+	};
+}
+
+namespace hash_bucket
+{
+	template<class K, class V, class Hash>
+	class HashTable;
+
+	template<class K,class V,class Hash> 
+	struct HashNode
+	{
+		using Node = HashNode<K, V,Hash> ;
+		using HT = HashTable<K, V,Hash>;
+
+		std::pair<K, V> _kv;
+		Node* _next;
+
+		HashNode(const std::pair<K, V>& kv)
+			:_kv(kv)
+			, _next(nullptr)
+		{}
+
+	};
+
+	template<class K, class V,class Hash = HashFunc<K>>
+	class HashTable
+	{
+	public:
+		using Node = HashNode<K, V,Hash>;
+
+		HashTable()
+			:_table(10)
+			, _n(0)
+		{}
+
+		bool Insert(const std::pair<K,V>& kv)
+		{
+			if (Find(kv.first)) return false;
+
+			Hash hash;
+			//扩容
+			if (_n == _table.size())
+			{
+				std::vector<Node*> v(__stl_next_prime(_table.size() + 1));
+
+				//遍历旧表
+				for (int i = 0; i < _table.size(); i++)
+				{
+					if (_table[i] != nullptr)
+					{
+						Node* cur = _table[i];
+						size_t hashi = hash(_table[i]->_kv.first) % v.size();
+						while (cur) 
+						{
+							Node* next = cur->_next;
+
+							//头插到新表
+							cur->_next = v[hashi];
+							v[hashi] = cur;
+
+							cur = next;
+						}
+						_table[i] = nullptr;
+					}
+				}
+				_table.swap(v);
+			}
+
+			size_t hashi = hash(kv.first) % _table.size();
+			Node* newnode = new Node(kv);
+
+			Node* cur = _table[hashi];
+			if (cur == nullptr)
+			{
+				//没有节点，直接插入
+				_table[hashi] = newnode;
+			}
+			else
+			{
+				//头插
+				newnode->_next = cur;
+				_table[hashi] = newnode;
+			}
+			++_n;
+
+			return true;
+ 		}
+
+
+		Node* Find(const K& key)
+		{
+			Hash hash;
+			size_t hashi = hash(key) % _table.size();
+			Node* cur = _table[hashi];
+			while (cur)
+			{
+				if (cur->_kv.first == key) return cur;
+
+				cur = cur->_next;
 			}
 
 			return nullptr;
@@ -137,350 +261,40 @@ namespace openaddress
 
 		bool Erase(const K& key)
 		{
-			HashData<K, V>* ret = Find(key);
+			auto ret = Find(key);
+			if (ret == nullptr) return false;
 
-			if (ret == nullptr)
+			Hash hash;
+			size_t hashi = hash(key) % _table.size();
+			if (ret->_next == nullptr)
 			{
-				return false;
+				delete ret;
+				_table[hashi] = nullptr;
 			}
 			else
 			{
-				ret->_state = DELETE;
-				return true;
+				Node* prev = _table[hashi];
+				Node* next = ret->_next;
+
+				while (prev->_next != ret)
+				{
+					prev = prev->_next;
+				}
+
+				delete ret;
+				prev->_next = next;
 			}
 
+			--_n;
+
+			return true;
 		}
 
 	private:
-		std::vector<HashData<K, V>> _tables;
-		size_t _n;
-	};
-}
-
-
-namespace hash_bucket
-{
-	template<class T>
-	struct HashNode
-	{
-		HashNode<T>* _next;
-		T _data;
-
-		HashNode(const T& data)
-			:_data(data)
-			, _next(nullptr)
-		{}
-	};
-
-	//前置声明
-	template<class K, class T, class KeyOfT, class Hash = HashFunc<K>>
-	class HashTable;
-
-	template<class K,class T,class KeyOfT,class Ref,class Ptr,class Hash>
-	struct HashIterator
-	{
-		using Node = HashNode<T>;
-		using HT = HashTable<K, T, KeyOfT,Hash>;
-		using Self = HashIterator<K, T, KeyOfT, Ref, Ptr,Hash>;
-
-		Node* _node;
-		const HT* _ht;
-
-		HashIterator(Node* node, const HT* ht)
-			:_ht(ht)
-			, _node(node)
-		{}
-
-
-		Ref operator*()
-		{
-			return _node->_data;
-		}
-
-		Ptr operator->()
-		{
-			return &_node->_data;
-		}
-
-		Self operator++()
-		{
-			if (_node->_next)
-			{
-				//当前桶内还有节点
-				_node = _node->_next;
-			}
-			else
-			{
-				//寻找下一个桶
-				Hash hash;
-				KeyOfT kot;
-
-				size_t hashi = hash(kot(_node->_data)) % _ht->_table.size();
-				
-				//从下一个桶开始
-				++hashi;
-				while (hashi < _ht->_table.size())
-				{
-					_node = _ht->_table[hashi];
-
-					if (_node) break;
-					else ++hashi;
-				}
-
-				if (hashi == _ht->_table.size())
-				{
-					_node = nullptr;
-				}
-			}
-
-			return *this;
-		}
-
-		bool operator==(const Self& s)
-		{
-			return _node == s._node;
-		}
-
-		bool operator!=(const Self& s)
-		{
-			return _node != s._node;
-		}
-	};
-
-
-	template<class K,class T,class KeyOfT,class Hash>
-	class HashTable
-	{
-		//友元
-		template<class K, class T, class KeyOfT, class Ref, class Ptr, class Hash>
-		friend struct HashIterator;
-
-	public:
-		using Node = HashNode<T>;
-		using iterator = HashIterator<K, T, KeyOfT, T&, T*,Hash>;
-		using const_iterator = HashIterator<K, T, KeyOfT, const T&, const T*,Hash>;
-
-		HashTable(size_t size = __stl_next_prime(0))
-			:_table(size)
-			, _n(0)
-		{}
-
-		void Destroy()
-		{
-			for (int i = 0; i < _table.size(); i++)
-			{
-				Node* cur = _table[i];
-				while (cur)
-				{
-					Node* next = cur->_next;
-					delete cur;
-
-					cur = next;
-				}
-
-				_table[i] = nullptr;
-				
-			}
-			_n = 0;
-		}
-
-		~HashTable()
-		{
-			Destroy();
-			//自动调用自定义类型析构
-		}
-
-		HashTable(const HashTable& ht)
-			: _n(0)
-		{
-			_table.resize(ht._table.size(),nullptr);
-			for (int i = 0; i < ht._table.size(); i++)
-			{
-				Node* cur = ht._table[i];
-				while (cur)
-				{
-					Node* newnode = new Node(cur->_kv);
-
-					//头插到新链表
-					newnode->_next = _table[i];
-					_table[i] = newnode;
-
-					++_n;
-
-					cur = cur->_next;
-				}
-			}
-		}
-
-		iterator Begin()
-		{
-			if (_n == 0) return End();
-
-			for (int i = 0; i < _table.size(); i++)
-			{
-				Node* cur = _table[i];
-				if (cur) return iterator(cur, this);
-			}
-
-			return End();
-		}
-
-		iterator End()
-		{
-			return iterator(nullptr, this);
-		}
-
-		const_iterator Begin() const
-		{
-			if (_n == 0) return End();
-
-			for (int i = 0; i < _table.size(); i++)
-			{
-				Node* cur = _table[i];
-				if (cur) return const_iterator(cur, this);
-			}
-
-			return End();
-		}
-
-		const_iterator End() const
-		{
-			return const_iterator(nullptr, this);
-
-		}
-
-		HashTable& operator=(const HashTable& ht)
-		{
-			if (this != &ht)
-			{
-				//1.清空自身节点
-				Destroy();
-
-				//2.深拷贝
-				_table.resize(ht._table.size(), nullptr);
-				for (int i = 0; i < ht._table.size(); i++)
-				{
-					Node* cur = ht._table[i];
-					while (cur)
-					{
-						Node* newnode = new Node(cur->_kv);
-
-						//头插到新链表
-						newnode->_next = _table[i];
-						_table[i] = newnode;
-
-						++_n;
-
-						cur = cur->_next;
-					}
-				}
-			}
-			return *this;
-		}
-
-
-		std::pair<iterator, bool> Insert(const T& data)
-		{
-			KeyOfT kot;
-			auto it = Find(kot(data));
-			if (it != End()) return { it,false };
-
-			Hash hash;
-			//负载因子 >= 1 --> 扩容
-			if (_n == _table.size())
-			{
-				//不能创建 HashTable newtable + Insert,交换后原哈希桶链表无法释放
-				std::vector<Node*> _newtable(__stl_next_prime(_table.size() + 1));
-				for (int i = 0; i < _table.size(); i++)
-				{
-					Node* cur = _table[i];
-					while (cur)
-					{
-						Node* next = cur->_next;
-						
-						//newtable 元素个数已改变，映射关系重新计算
-						size_t hashi = hash(kot(cur->_data)) % _newtable.size();
-						cur->_next = _newtable[hashi];
-						_newtable[hashi] = cur;
-
-						cur = next;
-					}
-
-					//原表存储的地址改为nullptr
-					_table[i] = nullptr;
-				}
-				_table.swap(_newtable);
-			}
-			
-			size_t hashi = hash(kot(data)) % _table.size();
-			//头插
-			Node* newnode = new Node(data);
-			newnode->_next = _table[hashi];
-			_table[hashi] = newnode;
-			++_n;
-
-			return { iterator(newnode,this) ,true };
-		}
-
-		iterator Find(const K& key)
-		{
-			Hash hash;
-			KeyOfT kot;
-
-			size_t hashi = hash(key) % _table.size();
-
-			Node* cur = _table[hashi];
-			while (cur)
-			{
-				if (kot(cur->_data) == key) return iterator(cur,this);
-
-				cur = cur->_next;
-			}
-			return End();
-		}
-
-		bool Erase(const K& key)
-		{
-			Hash hash;
-			size_t hashi = hash(key) % _table.size();
-
-			Node* cur = _table[hashi];
-			Node* prev = nullptr;
-			while (cur)
-			{
-				if (cur->kot(cur->_data) == key)
-				{
-					if (prev == nullptr)
-					{
-						//第一个节点
-						_table[hashi] = cur->_next;
-					}
-					else
-					{
-						//中间节点
-						prev->_next = cur->_next;
-					}
-
-					delete cur;
-					--_n;
-
-					return true;
-				}
-				else
-				{
-					prev = cur;
-					cur = cur->_next;
-				}
-			}
-
-			return false;
-		}
-
-	private:
-
-
-
 		std::vector<Node*> _table;
 		size_t _n;
 	};
+
+
+
 }
