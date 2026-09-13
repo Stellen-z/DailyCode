@@ -61,43 +61,92 @@ namespace open_address
 
 namespace hash_bucket
 {
-	void test_insert()
-	{
-		int a[] = { 19,30,5,36,13,20,23,38,27,69};
-		HashTable<int, int> ht;
-		for (auto e : a)
-		{
-			ht.Insert({ e, e });
-		}
+	//void test_insert()
+	//{
+	//	int a[] = { 19,30,5,36,13,20,23,38,27,69};
+	//	HashTable<int, int> ht;
+	//	for (auto e : a)
+	//	{
+	//		ht.Insert({ e, e });
+	//	}
 
-		ht.Insert({ 15, 15 });
+	//	ht.Insert({ 15, 15 });
 
-	}
+	//	ht.Erase(30);
+	//	if (ht.Find(20))
+	//	{
+	//		std::cout << "找到了" << std::endl;
+	//	}
+	//	else
+	//	{
+	//		std::cout << "没有找到" << std::endl;
+	//	}
 
-	void test_template()
-	{
-		int a[] = { 19,30,52,63,11,22 };
+	//	if (ht.Find(30))
+	//	{
+	//		std::cout << "找到了" << std::endl;
+	//	}
+	//	else
+	//	{
+	//		std::cout << "没有找到" << std::endl;
+	//	}
 
-		const char* a1[] = { "abcd", "sort", "insert" };
-		HashTable<std::string, std::string> ht1;
-		for (auto& e : a1)
-		{
-			ht1.Insert({ e, e });
-		}
+	//	if (ht.Find(23))
+	//	{
+	//		std::cout << "找到了" << std::endl;
+	//	}
+	//	else
+	//	{
+	//		std::cout << "没有找到" << std::endl;
+	//	}
+	//}
 
-		std::cout << HashFunc<std::string>()("abcd") << std::endl;
-		std::cout << HashFunc<std::string>()("bcad") << std::endl;
-		std::cout << HashFunc<std::string>()("aadd") << std::endl;
+	//void test_template()
+	//{
+	//	int a[] = { 19,30,52,63,11,22 };
 
-		int a2[] = { -19,-30,5,36,13,20,21,12 };
-		HashTable<int, int> ht2;
-		for (auto e : a2)
-		{
-			ht2.Insert({ e, e });
-		}
+	//	const char* a1[] = { "abcd", "sort", "insert" };
+	//	HashTable<std::string, std::string> ht1;
+	//	for (auto& e : a1)
+	//	{
+	//		ht1.Insert({ e, e });
+	//	}
 
-	}
+	//	std::cout << HashFunc<std::string>()("abcd") << std::endl;
+	//	std::cout << HashFunc<std::string>()("bcad") << std::endl;
+	//	std::cout << HashFunc<std::string>()("aadd") << std::endl;
+
+	//	int a2[] = { -19,-30,5,36,13,20,21,12 };
+	//	HashTable<int, int> ht2;
+	//	for (auto e : a2)
+	//	{
+	//		ht2.Insert({ e, e });
+	//	}
+
+	//}
+
+	//void test_iterator()
+	//{
+	//	int a[] = { 19,30,5,36,13,20,23,38,27,69 };
+	//	HashTable<int, int> ht;
+
+	//	for (auto e : a)
+	//	{	
+	//		ht.Insert({ e,e });
+	//	}
+
+	//	auto it = ht.begin();
+	//	while (it != ht.end())
+	//	{
+	//		std::cout << (*it).first << ":" <<  (*it).second << std::endl;
+	//		++it;
+	//	}
+	//}
 }
+
+#include "UnorderedSet.h"
+#include "UnorderedMap.h"
+
 
 int main()
 {
@@ -105,6 +154,11 @@ int main()
 	//open_address::test_template();
 
 	//hash_bucket::test_insert();
-	hash_bucket::test_template();
+	//hash_bucket::test_template();
+	//hash_bucket::test_iterator();
+
+	//stl::test_set1();
+	stl::test_map1();
+
 	return 0;
 }

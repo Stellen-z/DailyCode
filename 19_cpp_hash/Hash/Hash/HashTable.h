@@ -1,4 +1,5 @@
-﻿#include <iostream>
+﻿#pragma once
+#include <iostream>
 #include <vector>
 
 template<class K>
@@ -149,6 +150,7 @@ namespace open_address
 			ret->_state = DELETE;
 			--_n;
 
+
 			return true;
 		}
 
@@ -160,39 +162,147 @@ namespace open_address
 
 namespace hash_bucket
 {
-	template<class K, class V, class Hash>
+	template<class K, class T, class KeyOfT, class Hash = HashFunc<K>>
 	class HashTable;
 
-	template<class K,class V,class Hash> 
+	template<class K,class T,class KeyOfT,class Hash> 
 	struct HashNode
 	{
-		using Node = HashNode<K, V,Hash> ;
-		using HT = HashTable<K, V,Hash>;
+		using Node = HashNode<K, T,KeyOfT,Hash> ;
+		using HT = HashTable<K, T, KeyOfT, Hash>;
 
-		std::pair<K, V> _kv;
+		T _data;
 		Node* _next;
 
-		HashNode(const std::pair<K, V>& kv)
-			:_kv(kv)
+		HashNode(const T& data)
+			:_data(data)
 			, _next(nullptr)
 		{}
 
 	};
 
-	template<class K, class V,class Hash = HashFunc<K>>
+	template<class K,class T,class KeyOfT,class Hash,class Ref,class Ptr>
+	struct HashIterator
+	{
+		using Node = HashNode<K, T, KeyOfT, Hash>;
+		using HT = HashTable<K, T, KeyOfT, Hash>;
+		using Self = HashIterator<K, T, KeyOfT, Hash,Ref,Ptr>;
+
+		Node* _node;
+		const HT* _ht;
+
+		HashIterator(Node* node, const HT* ht)
+			:_node(node)
+			, _ht(ht)
+		{}
+
+		Ref operator*()
+		{
+			return _node->_data;
+		}
+
+		Ptr operator->()
+		{
+			return &_node->_data;
+		}
+
+		Self& operator++()
+		{
+			if(_node->_next)
+			{
+				_node = _node->_next;
+			}
+			else
+			{
+				//找到下一个不为空的桶
+				KeyOfT kot;
+				Hash hash;
+				size_t hashi = hash(kot(_node->_data)) % _ht->_table.size();
+				++hashi; //从下一个位置开始
+				while (hashi < _ht->_table.size())
+				{
+					if (_ht->_table[hashi] != nullptr)
+					{
+						_node = _ht->_table[hashi];
+
+						return *this;
+					}
+					++hashi;
+				}
+				
+				//走到最后一个桶，显示置为nullptr
+				_node = nullptr;
+			}
+			
+			return *this;
+		}
+
+		bool operator!=(const Self& s)
+		{
+			return _node != s._node;
+		}
+
+	};
+
+	template<class K, class T,class KeyOfT, class Hash>
 	class HashTable
 	{
 	public:
-		using Node = HashNode<K, V,Hash>;
+		template<class K, class T, class KeyOfT, class Hash,class Ref, class Ptr>
+		friend struct HashIterator;
+
+		using Node = HashNode<K, T, KeyOfT, Hash>;
+		using iterator       = HashIterator<K, T, KeyOfT, Hash, T&, T*>;
+		using const_iterator = HashIterator<K, T, KeyOfT, Hash, const T&,const T*>;
+
 
 		HashTable()
-			:_table(10)
+			:_table(__stl_next_prime(0))
 			, _n(0)
 		{}
 
-		bool Insert(const std::pair<K,V>& kv)
+		iterator Begin()
 		{
-			if (Find(kv.first)) return false;
+			if (_n == 0) return End();
+
+			//第一个不为空的节点
+			for (int i = 0; i < _table.size(); i++)
+			{
+				if (_table[i]) return { _table[i],this };
+			}
+
+			return End();
+		}
+
+		iterator End()
+		{
+			return { nullptr,this };
+		}
+
+		const_iterator Begin() const
+		{
+			if (_n == 0) return End();
+			Hash hash;
+
+			//第一个不为空的节点
+			for (int i = 0; i < _table.size(); i++)
+			{
+				if (_table[i]) return { _table[i],this };
+			}
+
+			return End();
+		}
+
+		const_iterator End() const
+		{
+			return { nullptr,this };
+		}
+
+		std::pair<iterator,bool> Insert(const T& data)
+		{
+			KeyOfT kot;
+			iterator ret = Find(kot(data));
+			if (ret != End()) return { ret,false};
 
 			Hash hash;
 			//扩容
@@ -206,7 +316,7 @@ namespace hash_bucket
 					if (_table[i] != nullptr)
 					{
 						Node* cur = _table[i];
-						size_t hashi = hash(_table[i]->_kv.first) % v.size();
+						size_t hashi = hash(kot(_table[i]->_data)) % v.size();
 						while (cur) 
 						{
 							Node* next = cur->_next;
@@ -223,8 +333,8 @@ namespace hash_bucket
 				_table.swap(v);
 			}
 
-			size_t hashi = hash(kv.first) % _table.size();
-			Node* newnode = new Node(kv);
+			size_t hashi = hash(kot(data)) % _table.size();
+			Node* newnode = new Node(data);
 
 			Node* cur = _table[hashi];
 			if (cur == nullptr)
@@ -240,54 +350,63 @@ namespace hash_bucket
 			}
 			++_n;
 
-			return true;
+			return { iterator(newnode,this),true };
  		}
 
 
-		Node* Find(const K& key)
+		iterator Find(const K& key)
 		{
+			KeyOfT kot;
 			Hash hash;
+			
 			size_t hashi = hash(key) % _table.size();
 			Node* cur = _table[hashi];
 			while (cur)
 			{
-				if (cur->_kv.first == key) return cur;
+				if (kot(cur->_data) == key) return iterator{ cur,this };
 
 				cur = cur->_next;
 			}
 
-			return nullptr;
+			return End();
 		}
 
 		bool Erase(const K& key)
 		{
-			auto ret = Find(key);
-			if (ret == nullptr) return false;
-
 			Hash hash;
+			KeyOfT kot;
+
 			size_t hashi = hash(key) % _table.size();
-			if (ret->_next == nullptr)
-			{
-				delete ret;
-				_table[hashi] = nullptr;
-			}
-			else
-			{
-				Node* prev = _table[hashi];
-				Node* next = ret->_next;
 
-				while (prev->_next != ret)
+			Node* prev = nullptr;
+			Node* cur = _table[hashi];
+			while (cur)
+			{
+				if (kot(cur->_data) == key)
 				{
-					prev = prev->_next;
-				}
+					if (prev == nullptr)
+					{
+						//头节点
+						_table[hashi] = cur->_next;
+					}
+					else
+					{
+						prev->_next = cur->_next;
+					}
 
-				delete ret;
-				prev->_next = next;
+					delete cur;
+					--_n;
+
+					return true;
+				}
+				else
+				{
+					prev = cur;
+					cur = cur->_next;
+				}
 			}
 
-			--_n;
-
-			return true;
+			return false;
 		}
 
 	private:
