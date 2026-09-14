@@ -19,8 +19,8 @@ struct HashFunc<std::string>
 		size_t ch = 0;
 		for (auto& e : s)
 		{
-			ch += e;
 			ch *= 131;
+			ch += e;
 		}
 
 		return ch;
@@ -83,7 +83,7 @@ namespace open_address
 			if (Find(kv.first)) return false;
 
 			//扩容
-			if (_n * 10 / _table.size() == 7)
+			if (_n * 10 / _table.size() >= 7)
 			{
 				HashTable<K, V> newht;
 				newht._table.resize(__stl_next_prime(_table.size() + 1));
@@ -316,7 +316,7 @@ namespace hash_bucket
 					if (_table[i] != nullptr)
 					{
 						Node* cur = _table[i];
-						size_t hashi = hash(kot(_table[i]->_data)) % v.size();
+						size_t hashi = hash(kot(cur->_data)) % v.size();
 						while (cur) 
 						{
 							Node* next = cur->_next;
