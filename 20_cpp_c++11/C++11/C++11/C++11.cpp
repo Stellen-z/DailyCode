@@ -5,6 +5,7 @@
 #include<string.h>
 #include<algorithm>
 #include <list>
+#include <functional>
 
 #include "list.h"
 #include "string.h"
@@ -355,17 +356,125 @@ void test6()
 		cout << "*********************************" << endl;
 }
 
-int main()
+void test7()
 {
-	//test1();
-	//test2();
-	//test3()
-	//test4();
-	//test5();
+	auto f = [](){cout << "hello world!" << endl; };
+	f();
 
-	test6();
+	[]() {cout << "hello world!" << endl; }();
 
+	auto swap = [](int& x, int& y) {
+		int tmp = x;
+		x = y;
+		y = tmp;
+		};
+
+	int a = 1, b = 2;
+	cout << a << ":" << b << endl;
+	swap(a, b);
+	cout << a << ":" << b << endl;
+
+
+}
+	
+using placeholders::_1;
+using placeholders::_2;
+using placeholders::_3;
+
+
+
+void test8()
+{
+	// 复利
+	auto func1 = [](double rate, int money, int year)
+		{
+			double ret = money;
+			for (int i = 0; i < year; i++)
+			{
+				ret += ret * rate;
+			}
+			return ret;
+		};
+
+	function<double(int)> func5_2 = bind(func1, 0.02, _1, 5);
+	function<double(int)> func10_2 = bind(func1, 0.02, _1, 10);
+	function<double(int)> func15_2 = bind(func1, 0.02, _1, 15);
+
+	function<double(int)> func5_2_5 = bind(func1, 0.25, _1, 5);
+	function<double(int)> func10_2_5 = bind(func1, 0.25, _1, 10);
+	function<double(int)> func15_2_5 = bind(func1, 0.25, _1, 15);
+
+	cout << func5_2(100000) << endl;
+	cout << func10_2(100000) << endl;
+	cout << func15_2(100000) << endl;
+
+}
+
+double Divide(int a, int b)
+{
+	try
+	{
+		// 当b == 0时抛出异常​
+		if (b == 0)
+		{
+			string s("Divide by zero condition!");
+			throw s;
+		}
+		else
+		{
+			return ((double)a / (double)b);
+		}
+	}
+	catch (int errid)
+	{
+		cout << errid << endl;
+	}
 	return 0;
 }
+void Func()
+{
+	int len, time;
+	cin >> len >> time; try
+	{
+		cout << Divide(len, time) << endl;
+	}
+	catch (const char* errmsg)
+	{
+		cout << errmsg << endl;
+	}
+	cout << __FUNCTION__ << ":" << __LINE__ << "行执行" << endl;
+}
+
+//int main()
+//{
+//	while (1)
+//	{
+//		try
+//		{
+//			Func();
+//		}
+//		catch (const string& errmsg)
+//		{
+//			cout << errmsg << endl;
+//		}
+//	}
+//	return 0;
+//}
+
+
+//int main()
+//{
+//	//test1();
+//	//test2();
+//	//test3()
+//	//test4();
+//	//test5();
+//
+//	//test6();
+//	//test7();
+//	test8();
+//
+//	return 0;
+//}
 
 
