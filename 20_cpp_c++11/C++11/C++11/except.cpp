@@ -124,24 +124,24 @@ void HttpServer()
 	CacheMgr();
 }
 
-int main()
-{
-	srand(time(0));
-	while (1)
-	{
-		this_thread::sleep_for(chrono::seconds(1));
-		try 
-		{
-			HttpServer();
-		}
-		catch (const Exception& e) // 这里捕获基类，基类对象和派生类对象都可以被捕获​
-		{
-			cout << e.what() << endl;
-		}
-			catch (...)
-		{
-			cout << "Unkown Exception" << endl;
-		}
-	}
-	return 0;
-}
+//int main()
+//{
+//	srand(time(0));
+//	while (1)
+//	{
+//		this_thread::sleep_for(chrono::seconds(1));
+//		try 
+//		{
+//			HttpServer();
+//		}
+//		catch (const Exception& e) // 这里捕获基类，基类对象和派生类对象都可以被捕获​
+//		{
+//			cout << e.what() << endl;
+//		}
+//			catch (...)
+//		{
+//			cout << "Unkown Exception" << endl;
+//		}
+//	}
+//	return 0;
+//}

@@ -213,7 +213,7 @@ namespace stl
 			//先创建头节点
 			empty_init();
 
-			for (size_t i = 1; i <= n; i++)
+			for (size_t i = 1; i <=	 n; i++)
 			{
 				push_back(val);
 			}
