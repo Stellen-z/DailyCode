@@ -158,6 +158,44 @@ namespace stl
 			RNode->_bf = RNodeR->_bf = 0;
 		}
 
+		void RotateLR(Node* RNode)
+		{
+			Node* RNodeL = RNode->_left;
+			Node* RNodeLR = RNodeL->_right;
+			int bf = RNodeLR->_bf;
+
+			RotateL(RNodeL);
+			RotateR(RNodeLR);
+
+			if (bf == 0)
+			{
+				RNode->_bf = 0;
+				RNodeL->_bf = 0;
+				RNodeLR->_bf = 0;
+			}
+			else if (bf == 1)
+			{
+				RNode->_bf = 0;
+				RNodeL->_bf = -1;
+				RNodeLR->_bf = 0;
+			}
+			else if (bf == -1)
+			{
+				RNode->_bf = 1;
+				RNodeL->_bf = 0;
+				RNodeLR->_bf = 0;
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+
+		void RotateRL(Node* RNode)
+		{
+
+		}
+
 	private:
 		Node* _root = nullptr;
 	};
