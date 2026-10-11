@@ -7,13 +7,13 @@ namespace stl
 	template<class K,class V>
 	struct AVLNode
 	{
-		std::pair<K, V> _kv;
-		std::pair<K, V>* _left;
-		std::pair<K, V>* _right;
-		std::pair<K, V>* _parent;
+		std::pair<K,V> _kv;
+		AVLNode<K, V>* _left;
+		AVLNode<K, V>* _right;
+		AVLNode<K, V>* _parent;
 		int _bf;
 
-		AVLNode(const std : pair<K, V>& kv)
+		AVLNode(const std::pair<K, V>& kv)
 			:_kv(kv)
 			, _left(nullptr)
 			, _right(nullptr)
@@ -30,12 +30,12 @@ namespace stl
 		using Node = AVLNode<K, V>;
 
 
-		bool Insert(const std::pair<K,V>& kv)
+		bool Insert(const std::pair<K, V>& kv)
 		{
 			if (_root == nullptr)
 			{
 				_root = new Node(kv);
-				
+
 				return true;
 			}
 
@@ -49,7 +49,7 @@ namespace stl
 					parent = cur;
 					cur = cur->_right;
 				}
-				else if(kv.first < cur->_kv.first)
+				else if (kv.first < cur->_kv.first)
 				{
 					parent = cur;
 					cur = cur->_left;
@@ -86,22 +86,40 @@ namespace stl
 				else if (parent->_bf == 2 || parent->_bf == -2)
 				{
 					//旋转
+					if (parent->_bf == 2 && cur->_bf == 1)
+					{
+						RotateL(parent);
+					}
+					else if (parent->_bf == -2 && cur->_bf == -1)
+					{
+						RotateR(parent);
+					}
+					else if (parent->_bf == -2 && cur->_bf == 1)
+					{
+						RotateLR(parent);
+					}
+					else if (parent->_bf == 2 && cur->_bf == -1)
+					{
+						RotateRL(parent);
+					}
+
 					break;
 				}
 				else
 				{
 					//防御性编程
-					assert(false;)
+					assert(false);
 				}
 
 			}
 
+			return true;
 		}
 
 		void RotateR(Node* RNode)
 		{
-			Node* RNodeL = RNode->_right;
-			Node* RNodeLR = RNodeR->_left;
+			Node* RNodeL = RNode->_left;
+			Node* RNodeLR = RNodeL->_right;
 
 			//修改节点要同时修改孩子和父亲指针
 			RNode->_left = RNodeLR;
@@ -142,14 +160,14 @@ namespace stl
 			RNodeR->_left = RNode;
 			RNode->_parent = RNodeR;
 
-			if (RNodoP == nullptr)
+			if (RNodeP == nullptr)
 			{
 				_root = RNodeR;
 				_root->_parent = nullptr;
 			}
 			else
 			{
-				if (RNodeP->_left == RNode) RNodeP->_left = RNodeR:
+				if (RNodeP->_left == RNode) RNodeP->_left = RNodeR;
 				else RNodeP->_right = RNodeR;
 
 				RNodeR->_parent = RNodeP;
@@ -165,7 +183,7 @@ namespace stl
 			int bf = RNodeLR->_bf;
 
 			RotateL(RNodeL);
-			RotateR(RNodeLR);
+			RotateR(RNode);
 
 			if (bf == 0)
 			{
@@ -193,10 +211,129 @@ namespace stl
 
 		void RotateRL(Node* RNode)
 		{
+			Node* RNodeR = RNode->_right;
+			Node* RNodeRL = RNodeR->_left;
+			int bf = RNodeRL->_bf;
+
+			RotateR(RNodeR);
+			RotateL(RNode);
+
+			if (bf == 0)
+			{
+				RNode->_bf = 0;
+				RNodeR->_bf = 0;
+				RNodeRL->_bf = 0;
+			}
+			else if (bf == 1)
+			{
+				RNode->_bf = -1;
+				RNodeR->_bf = 0;
+				RNodeRL->_bf = 0;
+			}
+			else if (bf == -1)
+			{
+				RNode->_bf = 0;
+				RNodeR->_bf = 1;
+				RNodeRL->_bf = 0;
+			}
+			else
+			{
+				assert(false);
+			}
 
 		}
 
+		Node* Find(const K& key)
+		{
+			Node* cur = _root;
+			while (cur)
+			{
+				if (key > cur->_kv.first)
+				{
+					cur = cur->_right;
+				}
+				else if (key < cur->_kv.first)
+				{
+					cur = cur->_left;
+				}
+				else return cur;
+			}
+
+			return nullptr;
+		}
+
+
+		void InOrder()
+		{
+			_InOrder(_root);
+			std::cout << std::endl;
+		}
+
+		int Height()
+		{
+			return _Height(_root);
+		}
+
+		int Size()
+		{
+			return _Size(_root);
+		}
+
+		bool IsBalanceTree()
+		{
+			return _IsBalanceTree(_root);
+		}
+
 	private:
+		void _InOrder(Node* root)
+		{
+			if (root == nullptr) return;
+
+			_InOrder(root->_left);
+			std::cout << root->_kv.first << ":" << root->_kv.second << std::endl;
+			_InOrder(root->_right);
+		}
+
+		int _Height(Node* _root)
+		{
+			if (_root == nullptr) return 0;
+
+			return std::max(_Height(_root->_left), _Height(_root->_right)) + 1;
+		}
+
+
+		int _Size(Node* _root)
+		{
+			if (_root == nullptr) return 0;
+
+			return _Size(_root->_left) + _Size(_root->_right) + 1;
+		}
+
+		bool _IsBalanceTree(Node* root)
+		{
+			// 空树也是AVL树​
+			if (nullptr == root)
+				return true;
+			// 计算pRoot结点的平衡因子：即pRoot左右子树的高度差​
+			int leftHeight = _Height(root->_left);
+			int rightHeight = _Height(root->_right);
+			int diff = rightHeight - leftHeight;
+			// 如果计算出的平衡因子与pRoot的平衡因子不相等，或者​
+			// pRoot平衡因子的绝对值超过1，则一定不是AVL树​
+			if (abs(diff) >= 2)
+			{
+				std::cout << root->_kv.first << "高度差异常" << std::endl;
+				return false;
+			}
+			if (root->_bf != diff)
+			{
+				std::cout << root->_kv.first << "平衡因子异常" << std::endl;
+				return false;
+			}
+			// pRoot的左和右如果都是AVL树，则该树一定是AVL树​
+			return _IsBalanceTree(root->_left) && _IsBalanceTree(root->_right);
+		}
+
 		Node* _root = nullptr;
 	};
 }
